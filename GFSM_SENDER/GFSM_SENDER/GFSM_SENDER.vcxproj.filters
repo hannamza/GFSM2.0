@@ -1,0 +1,234 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="source">
+      <UniqueIdentifier>{88bd094e-91e0-4ee2-b11e-18e74b637704}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="socket">
+      <UniqueIdentifier>{df4bd912-68c7-4d1b-a630-a1d6f64506c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="display">
+      <UniqueIdentifier>{d7eaf51d-4956-4ed8-89aa-4b078a4ea041}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dump">
+      <UniqueIdentifier>{d4ef87ed-338c-4390-a86d-8889ba00c974}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GFSM_SENDER.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="GFSM_SENDERDlg.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="CriticalSectionEx.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="DeviceInfo.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="EventSend.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="TSingleton.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="SerialComm.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="Client.h">
+      <Filter>socket</Filter>
+    </ClInclude>
+    <ClInclude Include="ClientInterface.h">
+      <Filter>socket</Filter>
+    </ClInclude>
+    <ClInclude Include="ClientMan.h">
+      <Filter>socket</Filter>
+    </ClInclude>
+    <ClInclude Include="Network.h">
+      <Filter>socket</Filter>
+    </ClInclude>
+    <ClInclude Include="Log.h">
+      <Filter>socket</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonFunc.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\display\Global.h">
+      <Filter>display</Filter>
+    </ClInclude>
+    <ClInclude Include="..\display\MemDC.h">
+      <Filter>display</Filter>
+    </ClInclude>
+    <ClInclude Include="..\display\SkinButton.h">
+      <Filter>display</Filter>
+    </ClInclude>
+    <ClInclude Include="..\display\SkinDialog.h">
+      <Filter>display</Filter>
+    </ClInclude>
+    <ClInclude Include="..\display\XComboBox.h">
+      <Filter>display</Filter>
+    </ClInclude>
+    <ClInclude Include="..\display\XDateBox.h">
+      <Filter>display</Filter>
+    </ClInclude>
+    <ClInclude Include="..\display\XEditBox.h">
+      <Filter>display</Filter>
+    </ClInclude>
+    <ClInclude Include="..\display\XHeaderCtrl.h">
+      <Filter>display</Filter>
+    </ClInclude>
+    <ClInclude Include="..\display\XListCtrl.h">
+      <Filter>display</Filter>
+    </ClInclude>
+    <ClInclude Include="..\display\XSpinBox.h">
+      <Filter>display</Filter>
+    </ClInclude>
+    <ClInclude Include="MiniDump.h">
+      <Filter>dump</Filter>
+    </ClInclude>
+    <ClInclude Include="MinidumpHelp.h">
+      <Filter>dump</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonProtocol.h">
+      <Filter>socket</Filter>
+    </ClInclude>
+    <ClInclude Include="LoginDlg.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonState.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="ReadWriteState.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="EncDec.h">
+      <Filter>source</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="GFSM_SENDER.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="GFSM_SENDERDlg.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="DeviceInfo.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="EventSend.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="SerialComm.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Client.cpp">
+      <Filter>socket</Filter>
+    </ClCompile>
+    <ClCompile Include="Client_Process.cpp">
+      <Filter>socket</Filter>
+    </ClCompile>
+    <ClCompile Include="ClientInterface.cpp">
+      <Filter>socket</Filter>
+    </ClCompile>
+    <ClCompile Include="ClientMan.cpp">
+      <Filter>socket</Filter>
+    </ClCompile>
+    <ClCompile Include="Network.cpp">
+      <Filter>socket</Filter>
+    </ClCompile>
+    <ClCompile Include="Log.cpp">
+      <Filter>socket</Filter>
+    </ClCompile>
+    <ClCompile Include="CommonFunc.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\display\Global.cpp">
+      <Filter>display</Filter>
+    </ClCompile>
+    <ClCompile Include="..\display\SkinButton.cpp">
+      <Filter>display</Filter>
+    </ClCompile>
+    <ClCompile Include="..\display\SkinDialog.cpp">
+      <Filter>display</Filter>
+    </ClCompile>
+    <ClCompile Include="..\display\XComboBox.cpp">
+      <Filter>display</Filter>
+    </ClCompile>
+    <ClCompile Include="..\display\XDateBox.cpp">
+      <Filter>display</Filter>
+    </ClCompile>
+    <ClCompile Include="..\display\XEditBox.cpp">
+      <Filter>display</Filter>
+    </ClCompile>
+    <ClCompile Include="..\display\XHeaderCtrl.cpp">
+      <Filter>display</Filter>
+    </ClCompile>
+    <ClCompile Include="..\display\XListCtrl.cpp">
+      <Filter>display</Filter>
+    </ClCompile>
+    <ClCompile Include="..\display\XSpinBox.cpp">
+      <Filter>display</Filter>
+    </ClCompile>
+    <ClCompile Include="MiniDump.cpp">
+      <Filter>dump</Filter>
+    </ClCompile>
+    <ClCompile Include="MinidumpHelp.cpp">
+      <Filter>dump</Filter>
+    </ClCompile>
+    <ClCompile Include="LoginDlg.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="CommonState.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="ReadWriteState.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="EncDec.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GFSM_SENDER.rc">
+      <Filter>리소스 파일</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\GFSM_SENDER.rc2">
+      <Filter>리소스 파일</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\GFSM_SENDER.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+  </ItemGroup>
+</Project>

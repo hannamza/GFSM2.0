@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{a5b6abd3-7e81-44ca-a318-f1ac49a48662}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IOCP">
+      <UniqueIdentifier>{1d24d512-6965-4576-b8ee-86365ce09ca2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dump">
+      <UniqueIdentifier>{10e8e612-84b0-44c3-b677-a16e726f5038}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="db">
+      <UniqueIdentifier>{27581a35-7768-4b37-9008-6a6f084635ee}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GFSM_MCS.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="GFSM_MCSDlg.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Log.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="Network.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="TSingleton.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="Client.h">
+      <Filter>IOCP</Filter>
+    </ClInclude>
+    <ClInclude Include="IOEvent.h">
+      <Filter>IOCP</Filter>
+    </ClInclude>
+    <ClInclude Include="Packet.h">
+      <Filter>IOCP</Filter>
+    </ClInclude>
+    <ClInclude Include="Server.h">
+      <Filter>IOCP</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonFunc.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="MiniDump.h">
+      <Filter>dump</Filter>
+    </ClInclude>
+    <ClInclude Include="MinidumpHelp.h">
+      <Filter>dump</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonProtocol.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="DBConnectionManager.h">
+      <Filter>db</Filter>
+    </ClInclude>
+    <ClInclude Include="DBPool.h">
+      <Filter>db</Filter>
+    </ClInclude>
+    <ClInclude Include="CriticalSectionEx.h">
+      <Filter>common</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="GFSM_MCS.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="GFSM_MCSDlg.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Log.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="Network.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="Client.cpp">
+      <Filter>IOCP</Filter>
+    </ClCompile>
+    <ClCompile Include="IOEvent.cpp">
+      <Filter>IOCP</Filter>
+    </ClCompile>
+    <ClCompile Include="Packet.cpp">
+      <Filter>IOCP</Filter>
+    </ClCompile>
+    <ClCompile Include="Server.cpp">
+      <Filter>IOCP</Filter>
+    </ClCompile>
+    <ClCompile Include="CommonFunc.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="MiniDump.cpp">
+      <Filter>dump</Filter>
+    </ClCompile>
+    <ClCompile Include="MinidumpHelp.cpp">
+      <Filter>dump</Filter>
+    </ClCompile>
+    <ClCompile Include="Server_Process.cpp">
+      <Filter>IOCP</Filter>
+    </ClCompile>
+    <ClCompile Include="DBConnectionManager.cpp">
+      <Filter>db</Filter>
+    </ClCompile>
+    <ClCompile Include="DBPool.cpp">
+      <Filter>db</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GFSM_MCS.rc">
+      <Filter>리소스 파일</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\GFSM_MCS.rc2">
+      <Filter>리소스 파일</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\GFSM_MCS.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+  </ItemGroup>
+</Project>
