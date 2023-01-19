@@ -44,4 +44,5 @@ public:
 	afx_msg void OnBnClickedButtonStop();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg void OnDestroy();
 };

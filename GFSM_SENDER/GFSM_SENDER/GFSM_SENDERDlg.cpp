@@ -168,7 +168,12 @@ BOOL CGFSM_SENDERDlg::OnInitDialog()
 		m_comboPort.SetCurSel(0);
 	}
 
+#if 1
 	strcpy_s(m_szServerIP, "160.202.162.3");/*"192.168.1.222"*/
+#else
+	strcpy_s(m_szServerIP, "127.0.0.1");
+#endif
+
 	CClientInterface::New();
 	CClientInterface::Instance()->TryConnection(m_szServerIP, 10234);
 

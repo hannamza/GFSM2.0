@@ -67,6 +67,7 @@ BEGIN_MESSAGE_MAP(CLogRemoverDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_START, &CLogRemoverDlg::OnBnClickedButtonStart)
 	ON_BN_CLICKED(IDC_BUTTON_STOP, &CLogRemoverDlg::OnBnClickedButtonStop)
 	ON_WM_TIMER()
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 bool g_bThread = false;
@@ -370,4 +371,12 @@ void CLogRemoverDlg::DeleteLogfiles(CString sPath, CTime & tDel, int nYear, int 
 			}
 		}
 	}
+}
+
+void CLogRemoverDlg::OnDestroy()
+{
+	CDialogEx::OnDestroy();
+
+	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
+	OnBnClickedButtonStop();
 }
