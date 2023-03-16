@@ -110,6 +110,11 @@ BOOL CGFSM_MCSDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
+	
+	//20230316 GBM start - git hub test
+	int a = 0;
+	//20230316 GBM end
+
 	SetWindowText(_T("GFSM 메인 콘트롤 서버"));
 
 	m_nServerPort = 10234;
