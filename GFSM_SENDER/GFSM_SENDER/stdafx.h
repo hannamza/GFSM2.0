@@ -49,6 +49,95 @@ using namespace std;
 extern HANDLE G_hShutdown_Event;
 extern CGlobal Global;
 
+//20230207 GBM start - GBM 정의 추가
+//20230207 GBM - 이벤트 테스트 플래그, 배포 시에는 주석처리
+//#define EVENT_TEST_MODE	
+
+//수신기 event 버퍼 구성
+enum {
+	SI_EVENT_BUF_COMPANY_1,
+	SI_EVENT_BUF_COMPANY_2,
+	SI_EVENT_BUF_COMMAND,
+	SI_EVENT_BUF_FIRE_RECEIVER_1,
+	SI_EVENT_BUF_FIRE_RECEIVER_2,
+	SI_EVENT_BUF_UNIT_1,
+	SI_EVENT_BUF_UNIT_2,
+	SI_EVENT_BUF_DASH,
+	SI_EVENT_BUF_SYSTEM,
+	SI_EVENT_BUF_CIRCUIT_1,
+	SI_EVENT_BUF_CIRCUIT_2,
+	SI_EVENT_BUF_CIRCUIT_3,
+	SI_EVENT_BUF_OCCUR_INFO,
+	SI_EVENT_BUF_EOP_1,
+	SI_EVENT_BUF_EOP_2,
+	SI_EVENT_BUF_SIZE
+};
+
+//수신기 event 명령 코드 enum
+enum {
+	COMMAND_FIRE,
+	COMMAND_GAS,
+	COMMAND_SURVEIL,
+	COMMAND_CUT,
+	COMMAND_RECOVER,
+	COMMAND_TOTAL_COUNT
+};
+
+// 발생 정보 enum
+enum {
+	OCCUR_INFO_OCCUR,
+	OCCUR_INFO_RECOVER,
+	OCCUR_INFO_TOTAL_COUNT
+};
+
+//수신기 event 명령 코드 문자열
+static const TCHAR* g_lpszCommandString[] = {
+	_T("화재"),	//F
+	_T("가스"),	//G
+	_T("감시"),	//S
+	_T("단선"),	//T
+	_T("복구"),	//R
+	NULL
+};
+
+//수신기 event 명령 코드
+static const TCHAR g_lpszCommand[] = {
+	_T('F'),	//화재
+	_T('G'),	//가스
+	_T('S'),	//감시
+	_T('T'),	//단선
+	_T('R'),	//복구
+	NULL
+};
+
+//수신기 event 발생 문자열
+static const TCHAR* g_lpszOccurInfoString[] = {
+	_T("발생"),
+	_T("복구"),
+	NULL
+};
+
+//수신기 event 발생 코드
+static const TCHAR g_lpszOccurInfo[] = {
+	_T('N'),
+	_T('F'),
+	NULL
+};
+
+//수신기 최대 개수
+#define RECEIVER_MAX_COUNT	32
+
+//유닛 최대 개수
+#define UNIT_MAX_COUNT	64
+
+//계통 최대 개수
+#define SYSTEM_MAX_COUNT	4
+
+//회로 최대 개수
+#define CIRCUIT_MAX_COUNT	253
+
+//20230207 GBM end
+
 #ifndef _AFX_NO_OLE_SUPPORT
 #include <afxdtctl.h>           // Internet Explorer 4 공용 컨트롤에 대한 MFC 지원입니다.
 #endif

@@ -8,6 +8,7 @@
 #include "afxdialogex.h"
 #include "LoginDlg.h"
 #include "ReadWriteState.h"
+#include "DlgEventTest.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -71,6 +72,7 @@ void CGFSM_SENDERDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_STOP, m_btnStop);
 	DDX_Control(pDX, IDC_BUTTON_SEND, m_btnSend);
 	DDX_Control(pDX, IDC_EDIT_DIRECT_INPUT, m_editInput);
+	DDX_Control(pDX, IDC_BUTTON_EVENT, m_btnEvent);
 }
 
 BEGIN_MESSAGE_MAP(CGFSM_SENDERDlg, CSkinDialog)
@@ -96,6 +98,7 @@ BEGIN_MESSAGE_MAP(CGFSM_SENDERDlg, CSkinDialog)
 	ON_UPDATE_COMMAND_UI(ID__POPUP, &CGFSM_SENDERDlg::OnMenuUpdatePopup)
 	ON_UPDATE_COMMAND_UI(ID__EXIT, &CGFSM_SENDERDlg::OnMenuUpdateExit)
 	ON_WM_WINDOWPOSCHANGING()
+	ON_BN_CLICKED(IDC_BUTTON_EVENT, &CGFSM_SENDERDlg::OnBnClickedButtonEvent)
 END_MESSAGE_MAP()
 
 
@@ -153,7 +156,7 @@ BOOL CGFSM_SENDERDlg::OnInitDialog()
 
 	CString sText;
 	bool bFind = false;
-	for (int nIndex = 1; nIndex < 9; nIndex++)
+	for (int nIndex = 1; nIndex < 20; nIndex++)
 	{
 		sText.Format(L"COM%d", nIndex);
 		m_comboPort.InsertString(m_comboPort.GetCount(), sText);
@@ -168,11 +171,13 @@ BOOL CGFSM_SENDERDlg::OnInitDialog()
 		m_comboPort.SetCurSel(0);
 	}
 
-#if 1
+	//20230207 GBM start - test 추후 아이피 원복 필요
+#ifndef EVENT_TEST_MODE
 	strcpy_s(m_szServerIP, "160.202.162.3");/*"192.168.1.222"*/
 #else
 	strcpy_s(m_szServerIP, "127.0.0.1");
 #endif
+	//20230207 GBM end
 
 	CClientInterface::New();
 	CClientInterface::Instance()->TryConnection(m_szServerIP, 10234);
@@ -190,6 +195,10 @@ BOOL CGFSM_SENDERDlg::OnInitDialog()
 
 	m_editInput.ShowWindow(SW_HIDE);
 	m_btnSend.ShowWindow(SW_HIDE);
+
+#ifndef EVENT_TEST_MODE
+	//m_btnEvent.ShowWindow(SW_HIDE);
+#endif
 
 	CCommonState::New();
 
@@ -797,5 +806,28 @@ void CGFSM_SENDERDlg::OnWindowPosChanging(WINDOWPOS* lpwndpos)
 	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
 	if (!m_bAutoLogin) {
 		lpwndpos->flags &= ~SWP_SHOWWINDOW;
+	}
+}
+
+
+void CGFSM_SENDERDlg::OnBnClickedButtonEvent()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	CDlgEventTest dlg;
+	if (dlg.DoModal() == IDOK)
+	{
+		BYTE pData[SI_EVENT_BUF_SIZE];
+		memset(pData, NULL, SI_EVENT_BUF_SIZE);
+		memcpy(pData, dlg.m_eventBuf, SI_EVENT_BUF_SIZE);
+
+		CEventSend::Instance()->SendEvent(pData);
+
+		CString strBuf = _T("");
+		for (int i = 0; i < SI_EVENT_BUF_SIZE; i++)
+		{
+			strBuf += pData[i];
+		}
+
+		Log::Trace("Event Test - [%s] EventQueue Added!", CCommonFunc::WCharToChar(strBuf.GetBuffer(0)));
 	}
 }

@@ -73,4 +73,6 @@ public:
 	afx_msg void OnMenuUpdatePopup(CCmdUI *pCmdUI);
 	afx_msg void OnMenuUpdateExit(CCmdUI *pCmdUI);
 	afx_msg void OnWindowPosChanging(WINDOWPOS* lpwndpos);
+	CButton m_btnEvent;
+	afx_msg void OnBnClickedButtonEvent();
 };

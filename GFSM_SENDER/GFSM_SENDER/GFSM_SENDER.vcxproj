@@ -212,6 +212,7 @@
     <ClInclude Include="CommonState.h" />
     <ClInclude Include="CriticalSectionEx.h" />
     <ClInclude Include="DeviceInfo.h" />
+    <ClInclude Include="DlgEventTest.h" />
     <ClInclude Include="EncDec.h" />
     <ClInclude Include="EventSend.h" />
     <ClInclude Include="GFSM_SENDER.h" />
@@ -245,6 +246,7 @@
     <ClCompile Include="CommonFunc.cpp" />
     <ClCompile Include="CommonState.cpp" />
     <ClCompile Include="DeviceInfo.cpp" />
+    <ClCompile Include="DlgEventTest.cpp" />
     <ClCompile Include="EncDec.cpp" />
     <ClCompile Include="EventSend.cpp" />
     <ClCompile Include="GFSM_SENDER.cpp" />
