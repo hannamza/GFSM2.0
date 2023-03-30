@@ -151,4 +151,6 @@ public:
 
 	static BOOL		GetFileVersion(CString sFilePath, CString & sVersion);
 	static BOOL		RegistryDisableHighDpiAware(WCHAR* szPath=NULL);
+
+	static double	GetPreciseTime(LARGE_INTEGER startTime, LARGE_INTEGER endTime);		// millisecond ¹ÝÈ¯
 };

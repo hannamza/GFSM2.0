@@ -1587,3 +1587,15 @@ BOOL CCommonFunc::RegistryDisableHighDpiAware(WCHAR* pPath/*=NULL*/)
 	}
 	return TRUE;
 }
+
+double CCommonFunc::GetPreciseTime(LARGE_INTEGER startTime, LARGE_INTEGER endTime)
+{
+	double duringTime;
+	LARGE_INTEGER frequency;
+
+	QueryPerformanceFrequency(&frequency);
+	duringTime = (double)(endTime.QuadPart - startTime.QuadPart) / (double)frequency.QuadPart;
+	duringTime *= 1000;		//ms 변환
+	
+	return duringTime;
+}

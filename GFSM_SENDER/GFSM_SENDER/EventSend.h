@@ -60,16 +60,20 @@ protected:
 	//CString m_IDList[100];
 	int m_nIDCount;
 	CWnd* m_pWnd;
-	CList<userInfo*, userInfo*> m_list;
+	//CList<userInfo*, userInfo*> m_list;
 
 	DWORD m_dwLine, m_dwGas, m_dwSpy, m_dwFire, m_dwFix;
 
+public:
+	CList<userInfo*, userInfo*> m_list;
+	HANDLE m_hThread[USER_MAX_COUNT];
 
 private:
 	void StartSendEventThread();
 	void StopSendEventThread();
 	void ReleaseListUser();
 	void SendAlarm(BYTE* pData, int nSendCount);
+	void SendAlarmInParallel(BYTE* pData, int nSendCount);
 	void ProcessEventQueue(queue<BYTE*> & queue, DWORD & dwValue, bool bSend=false);
 	bool CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CString & sName, CString & sDisplay, int nSendCount);
 	void CheckAndSend();

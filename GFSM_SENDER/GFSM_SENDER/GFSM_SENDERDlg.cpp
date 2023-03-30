@@ -816,9 +816,11 @@ void CGFSM_SENDERDlg::OnBnClickedButtonEvent()
 	CDlgEventTest dlg;
 	if (dlg.DoModal() == IDOK)
 	{
-		BYTE pData[SI_EVENT_BUF_SIZE];
+		BYTE* pData = new BYTE[SI_EVENT_BUF_SIZE];
 		memset(pData, NULL, SI_EVENT_BUF_SIZE);
 		memcpy(pData, dlg.m_eventBuf, SI_EVENT_BUF_SIZE);
+
+		Sleep(500);
 
 		CEventSend::Instance()->SendEvent(pData);
 

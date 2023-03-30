@@ -18,6 +18,148 @@ void func_thread(CEventSend* pWnd)
 	}
 }
 
+char* qURLencode(char *str)
+{
+	char *encstr, buf[2 + 1];
+	unsigned char c;
+	int i, j;
+
+	if (str == NULL) return NULL;
+	if ((encstr = (char *)malloc((strlen(str) * 3) + 1)) == NULL)
+		return NULL;
+
+	for (i = j = 0; str[i]; i++)
+	{
+		c = (unsigned char)str[i];
+		if ((c >= '0') && (c <= '9')) encstr[j++] = c;
+		else if (c == ' ') encstr[j++] = '+';    // 웹에 맞게 추가
+		else if ((c >= 'A') && (c <= 'Z')) encstr[j++] = c;
+		else if ((c >= 'a') && (c <= 'z')) encstr[j++] = c;
+		else if ((c == '@') || (c == '.') || (c == '/') || (c == '\\')
+			|| (c == '-') || (c == '_') || (c == ':'))
+			encstr[j++] = c;
+		else
+		{
+			sprintf(buf, "%02x", c);
+			encstr[j++] = '%';
+			encstr[j++] = buf[0];
+			encstr[j++] = buf[1];
+		}
+	}
+	encstr[j] = '\0';
+
+	return encstr;
+}
+
+typedef struct {
+	CEventSend* pDlg;
+	char* pSendData;
+	int userIndex;
+	CTime currTime;
+	HANDLE hReq;
+	CString sTitle;
+	char* strUtf8;
+	char* szBody;
+	char* szTitle;
+	BOOL bJason;
+} ALARM_INFO;
+
+UINT SendAlarmThread(LPVOID param)
+{
+	//20230320 GBM start - test
+#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
+	LARGE_INTEGER startTime, endTime;
+	QueryPerformanceCounter(&startTime);
+#endif
+	//20230320 GBM end
+
+	ALARM_INFO* pAi;
+	pAi = (ALARM_INFO*)param;
+	CEventSend* pDlg = pAi->pDlg;
+	char* pSendData = pAi->pSendData;
+	int userIndex = pAi->userIndex;
+	CTime currTime = pAi->currTime;
+	HANDLE hReq = pAi->hReq;
+	CString sTitle = pAi->sTitle;
+	char* strUtf8 = pAi->strUtf8;
+	char* szBody = pAi->szBody;
+	char* szTitle = pAi->szTitle;
+	BOOL bJason = pAi->bJason;
+	
+	ResetEvent(pDlg->m_hThread[userIndex]);
+
+	char szSendData[4000];
+	memset(szSendData, 0, 4000);
+
+	//
+	userInfo* pInfo = pDlg->m_list.GetAt(pDlg->m_list.FindIndex(userIndex));
+	if (!pInfo) {
+		return 0;
+	}
+	if (pInfo->nUseTime) {
+		if (pInfo->nHour > currTime.GetHour() || pInfo->nEndHour < currTime.GetHour()
+			|| (pInfo->nHour == currTime.GetHour() && pInfo->nMin > currTime.GetMinute())
+			|| (pInfo->nEndHour == currTime.GetHour() && pInfo->nEndMin < currTime.GetMinute()))
+		{
+			return 0;
+		}
+	}
+	if (!pInfo->nAlert) {
+		return 0;
+	}
+	if (sTitle.Find(L"화재") >= 0 && pInfo->nFire == 0) {
+		return 0;
+	}
+	if (sTitle.Find(L"가스") >= 0 && pInfo->nGas == 0) {
+		return 0;
+	}
+	if (sTitle.Find(L"감시") >= 0 && pInfo->nSpy == 0) {
+		return 0;
+	}
+	if (sTitle.Find(L"단선") >= 0 && pInfo->nLine == 0) {
+		return 0;
+	}
+
+	if ("" != pInfo->szToken)//m_IDList[i])
+	{
+
+		//
+		int nLen = WideCharToMultiByte(CP_UTF8, 0, /*m_IDList[i]*/pInfo->szToken, lstrlenW(pInfo->szToken), NULL, 0, NULL, NULL);
+		WideCharToMultiByte(CP_UTF8, 0, pInfo->szToken, lstrlenW(pInfo->szToken), strUtf8, nLen, NULL, NULL);
+
+		char* mID = qURLencode(strUtf8);
+
+		if (!bJason) {
+			sprintf_s(szSendData, 4000, "&priority=high&%s%s&registration_id=%s", "data=", pSendData, mID);
+		}
+		else {
+			sprintf_s(szSendData, 4000, "{\"to\":\"%s\", \"priority\": \"high\", \
+						\"notification\" : {\"body\" : \"%s\",\"title\" : \"%s\"},\
+						\"data\" : {\"event\":\"%s\"},\
+							\"android\" : {	\"priority\":\"high\"},\
+								\"apns\" : {\"headers\":{\"apns-priority\":\"10\"}},\
+									\"webpush\" : {\"headers\": {\"Urgency\": \"high\"}}}"
+				, mID, szBody, szTitle, pSendData);
+		}
+		//
+
+		HttpSendRequest(hReq, NULL, 0, (LPVOID)szSendData, strlen(szSendData));
+	}
+	//
+
+	//20230320 GBM start - test
+#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
+	QueryPerformanceCounter(&endTime);
+	double duringTime = CCommonFunc::GetPreciseTime(startTime, endTime);
+	Log::Trace("%d 스레드 FCM Push Message 처리 시간 : %f", userIndex, duringTime);
+#endif
+	//20230320 GBM end
+
+	SetEvent(pDlg->m_hThread[userIndex]);
+
+	return 0;
+}
+
 CEventSend::CEventSend()
 {
 	m_pThread = NULL;
@@ -161,39 +303,6 @@ void CEventSend::StopSendEventThread()
 	SAFE_DELETE(m_pThread);
 }
 
-char* qURLencode(char *str)
-{
-	char *encstr, buf[2 + 1];
-	unsigned char c;
-	int i, j;
-
-	if (str == NULL) return NULL;
-	if ((encstr = (char *)malloc((strlen(str) * 3) + 1)) == NULL)
-		return NULL;
-
-	for (i = j = 0; str[i]; i++)
-	{
-		c = (unsigned char)str[i];
-		if ((c >= '0') && (c <= '9')) encstr[j++] = c;
-		else if (c == ' ') encstr[j++] = '+';    // 웹에 맞게 추가
-		else if ((c >= 'A') && (c <= 'Z')) encstr[j++] = c;
-		else if ((c >= 'a') && (c <= 'z')) encstr[j++] = c;
-		else if ((c == '@') || (c == '.') || (c == '/') || (c == '\\')
-			|| (c == '-') || (c == '_') || (c == ':'))
-			encstr[j++] = c;
-		else
-		{
-			sprintf(buf, "%02x", c);
-			encstr[j++] = '%';
-			encstr[j++] = buf[0];
-			encstr[j++] = buf[1];
-		}
-	}
-	encstr[j] = '\0';
-
-	return encstr;
-}
-
 void CEventSend::SendThreadLoop()
 {
 	BYTE *pData;
@@ -324,6 +433,7 @@ void CEventSend::ProcessEventQueue(queue<BYTE*> & queue, DWORD & dwValue, bool b
 	char szLog[512];
 	BYTE* pData;
 	BYTE* pDataSave = queue.front();
+
 	int nSendCount = 0;
 	while (!queue.empty()) {
 		pData = queue.front();
@@ -332,6 +442,7 @@ void CEventSend::ProcessEventQueue(queue<BYTE*> & queue, DWORD & dwValue, bool b
 		if (!CheckClassify(pData, strUni, sTitle, strName, strDisplay, 0)) {
 			continue;
 		}
+
 		strcpy_s(szLog, CCommonFunc::WCharToChar(strUni.GetBuffer(0)));
 		Log::Trace(szLog);
 
@@ -366,7 +477,20 @@ void CEventSend::ProcessEventQueue(queue<BYTE*> & queue, DWORD & dwValue, bool b
 	if (bSend) {
 		if (GetTickCount() - CCommonState::Instance()->m_dwToken > 3000)
 		{
+			//20230320 GBM start - test
+			LARGE_INTEGER startTime, endTime;
+			QueryPerformanceCounter(&startTime);
+			//20230320 GBM end
+
 			CClientInterface::Instance()->ProcessCommonRequest(ProtocolHeader::RequestGetUserTokenList, CCommonState::Instance()->m_nIdx);
+
+			//20230320 GBM start - test
+			QueryPerformanceCounter(&endTime);
+			double duringTime;
+			duringTime = CCommonFunc::GetPreciseTime(startTime, endTime);
+			Log::Trace("사용자 리스트 요청에 걸린 시간 : %f", duringTime);
+			//20230320 GBM end
+
 			DWORD dwLastTime = GetTickCount();
 			CCommonState::Instance()->m_dwToken = 0;
 			while (g_bThread)
@@ -382,7 +506,8 @@ void CEventSend::ProcessEventQueue(queue<BYTE*> & queue, DWORD & dwValue, bool b
 				Sleep(1);
 			}
 		}
-		SendAlarm(pDataSave, nSize - 1);
+		//SendAlarm(pDataSave, nSize - 1);
+		SendAlarmInParallel(pDataSave, nSize - 1);
 	}
 
 	dwValue = 0;
@@ -578,6 +703,17 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 
 void CEventSend::SendAlarm(BYTE* pData, int nSendCount)
 {
+	//20233020 GBM start - test 1:초기화 루틴 분리, 2:기존 루틴
+#if 1
+	//
+	//20230320 GBM start - test
+#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
+	LARGE_INTEGER startTime, roopStartTime, initEndTime, endTime;
+	double duringTime;
+	QueryPerformanceCounter(&startTime);
+#endif
+	//20230320 GBM end
+
 	char szSendData[4000];
 	
 	char strUtf8[4000] = { 0, };
@@ -603,6 +739,224 @@ void CEventSend::SendAlarm(BYTE* pData, int nSendCount)
 
 	if (!CheckClassify(pData, strUni, sTitle, strName, strDisplay, nSendCount)) {
 		//SAFE_DELETE(pData);
+		//20230320 GBM start - test
+		Log::Trace("SendAlarm - CheckClassify 실패!");
+		CString strBuf = _T("");
+		for (int i = 0; i < SI_EVENT_BUF_SIZE; i++)
+		{
+			strBuf += pData[i];
+		}
+
+		Log::Trace("pData : [%s]", CCommonFunc::WCharToChar(strBuf.GetBuffer(0)));
+		//20230320 GBM end
+		return;
+	}
+
+	//---------------------------------------------------------------------------------------
+	nLen = WideCharToMultiByte(CP_UTF8, 0, strUni, lstrlenW(strUni), NULL, 0, NULL, NULL);
+	WideCharToMultiByte(CP_UTF8, 0, strUni, lstrlenW(strUni), strUtf8, nLen, NULL, NULL);
+
+	BOOL bJason = true;
+	if (bJason) {
+		strcpy_s(szBody, CCommonFunc::WcharToUtf8(strName.GetBuffer(0)));
+		strcpy_s(szTitle, CCommonFunc::WcharToUtf8(sTitle.GetBuffer(0)));
+	}
+
+	mIDSync.Enter();
+	int nCount = m_list.GetCount();
+	mIDSync.Leave();
+
+	// utf8 -> urlencode
+	pSendData = qURLencode(strUtf8);
+
+	mIDSync.Enter();
+	nCount = m_list.GetCount();
+	userInfo* pInfo = NULL;
+	
+	//
+
+	HANDLE hConnect = InternetOpen(L"FCM", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+	if (hConnect == NULL)
+	{
+		mIDSync.Leave();
+		//SAFE_DELETE(pData);
+		return;
+	}
+
+	HANDLE hHttp = InternetConnect(hConnect, L"fcm.googleapis.com", INTERNET_DEFAULT_HTTPS_PORT, NULL, NULL, INTERNET_SERVICE_HTTP, 0, NULL);
+	if (hHttp == NULL)
+	{
+		InternetCloseHandle(hConnect);
+		hHttp = NULL;
+		mIDSync.Leave();
+		//SAFE_DELETE(pData);
+		return;
+	}
+
+	HANDLE hReq = HttpOpenRequest(hHttp, L"POST", L"/fcm/send", L"HTTP/1.1", NULL, NULL,
+		INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_SECURE | INTERNET_FLAG_IGNORE_CERT_CN_INVALID | INTERNET_FLAG_IGNORE_CERT_DATE_INVALID, 0);
+	if (hReq == NULL)
+	{
+		InternetCloseHandle(hConnect);
+		InternetCloseHandle(hHttp);
+		mIDSync.Leave();
+		//SAFE_DELETE(pData);
+		return;
+	}
+
+	if (!bJason) {
+		strHeader += "Content-Type:application/x-www-form-urlencoded;charset=UTF-8";
+	}
+	else {
+		strHeader += "Content-Type:application/json";
+	}
+	strHeader += "\r\n";
+	strHeader += "Authorization:key=";
+	strHeader += "AAAAfiAPpoM:APA91bEeX02UhoaqaGvTPffwhhp1y7VAY1PFDFiMfkANhYoEZqrSunBoaBGKoXKvnljDGrksIjUPniz7w2bCN7Lp9GABQovcTsbMbab_yYBXrvtb9DXBvIODfeopk4DLbsYJRgD9eDO4";
+	strHeader += "\r\n\r\n";
+
+	HttpAddRequestHeaders(hReq, strHeader, strHeader.GetAllocLength(), HTTP_ADDREQ_FLAG_REPLACE | HTTP_ADDREQ_FLAG_ADD);
+
+	//20230320 GBM start - test
+#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
+	QueryPerformanceCounter(&initEndTime);
+	duringTime = CCommonFunc::GetPreciseTime(startTime, initEndTime);
+	Log::Trace("FCM Push Message 초기화 시간 : %f", duringTime);
+#endif
+	//20230320 GBM end
+	//
+
+	for (int i = 0; i < nCount; i++)
+	{
+		pInfo = m_list.GetAt(m_list.FindIndex(i));
+		if (!pInfo) {
+			continue;
+		}
+		if (pInfo->nUseTime) {
+			if (pInfo->nHour > currTime.GetHour() || pInfo->nEndHour < currTime.GetHour()
+				|| (pInfo->nHour == currTime.GetHour() && pInfo->nMin > currTime.GetMinute())
+				|| (pInfo->nEndHour == currTime.GetHour() && pInfo->nEndMin < currTime.GetMinute()))
+			{
+				continue;
+			}
+		}
+		if (!pInfo->nAlert) {
+			continue;
+		}
+		if (sTitle.Find(L"화재") >= 0 && pInfo->nFire == 0) {
+			continue;
+		}
+		if (sTitle.Find(L"가스") >= 0 && pInfo->nGas == 0) {
+			continue;
+		}
+		if (sTitle.Find(L"감시") >= 0 && pInfo->nSpy == 0) {
+			continue;
+		}
+		if (sTitle.Find(L"단선") >= 0 && pInfo->nLine == 0) {
+			continue;
+		}
+
+		if ("" != pInfo->szToken)//m_IDList[i])
+		{
+			//20230320 GBM start - test
+#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
+			QueryPerformanceCounter(&roopStartTime);
+#endif
+			//20230320 GBM end
+
+			//
+			nLen = WideCharToMultiByte(CP_UTF8, 0, /*m_IDList[i]*/pInfo->szToken, lstrlenW(pInfo->szToken), NULL, 0, NULL, NULL);
+			WideCharToMultiByte(CP_UTF8, 0, pInfo->szToken, lstrlenW(pInfo->szToken), strUtf8, nLen, NULL, NULL);
+
+			mID = qURLencode(strUtf8);
+
+			if (!bJason) {
+				sprintf_s(szSendData, 4000, "&priority=high&%s%s&registration_id=%s", "data=", pSendData, mID);
+			}
+			else {
+				sprintf_s(szSendData, 4000, "{\"to\":\"%s\", \"priority\": \"high\", \
+						\"notification\" : {\"body\" : \"%s\",\"title\" : \"%s\"},\
+						\"data\" : {\"event\":\"%s\"},\
+							\"android\" : {	\"priority\":\"high\"},\
+								\"apns\" : {\"headers\":{\"apns-priority\":\"10\"}},\
+									\"webpush\" : {\"headers\": {\"Urgency\": \"high\"}}}"
+					, mID, szBody, szTitle, pSendData);
+			}
+			//
+
+			HttpSendRequest(hReq, NULL, 0, (LPVOID)szSendData, strlen(szSendData));
+
+			//20230320 GBM start - test
+#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
+			QueryPerformanceCounter(&endTime);
+			duringTime = CCommonFunc::GetPreciseTime(roopStartTime, endTime);
+			Log::Trace("사용자 %d, FCM Push Message 처리 시간 : %f", i, duringTime);
+#endif
+			//20230320 GBM end
+		}
+	}
+
+	free(mID);
+	::InternetCloseHandle(hReq);
+	::InternetCloseHandle(hHttp);
+	::InternetCloseHandle(hConnect);
+	free(pSendData);
+
+	SAFE_DELETE(pData);
+
+	//20230320 GBM start - test
+#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
+	QueryPerformanceCounter(&endTime);
+	duringTime = CCommonFunc::GetPreciseTime(startTime, endTime);
+	Log::Trace("FCM Push Message 전체 처리 시간 : %f", duringTime);
+#endif
+	//20230320 GBM end
+
+	mIDSync.Leave();
+#else
+	//20230320 GBM start - test
+#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
+	LARGE_INTEGER startTime, endTime;
+	double duringTime;
+	QueryPerformanceCounter(&startTime);
+#endif
+	//20230320 GBM end
+
+	char szSendData[4000];
+
+	char strUtf8[4000] = { 0, };
+	int nLen;
+	char* pSendData;
+	char* mID;
+	char szTitle[64], szBody[128];
+
+	CTime   currTime;
+	CString strHeader;
+	CString strInputType;
+	CString sTemp;
+	LPVOID lpOutputBuffer = NULL;
+
+	DWORD dwLastTime = 0;
+
+	memset(szSendData, 0, 4000);
+	memset(strUtf8, 0x00, 4000);
+
+	currTime = CTime::GetCurrentTime();
+
+	CString strUni, sTitle, strName, strDisplay;
+
+	if (!CheckClassify(pData, strUni, sTitle, strName, strDisplay, nSendCount)) {
+		//SAFE_DELETE(pData);
+		//20230320 GBM start - test
+		Log::Trace("SendAlarm - CheckClassify 실패!");
+		CString strBuf = _T("");
+		for (int i = 0; i < SI_EVENT_BUF_SIZE; i++)
+		{
+			strBuf += pData[i];
+		}
+
+		Log::Trace("pData : [%s]", CCommonFunc::WCharToChar(strBuf.GetBuffer(0)));
+		//20230320 GBM end
 		return;
 	}
 
@@ -658,6 +1012,13 @@ void CEventSend::SendAlarm(BYTE* pData, int nSendCount)
 
 		if ("" != pInfo->szToken)//m_IDList[i])
 		{
+			//20230320 GBM start - test
+#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
+			LARGE_INTEGER startTime, endTime;
+			QueryPerformanceCounter(&startTime);
+#endif
+			//20230320 GBM end
+
 			HANDLE hConnect = InternetOpen(L"FCM", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
 			if (hConnect == NULL)
 			{
@@ -710,11 +1071,11 @@ void CEventSend::SendAlarm(BYTE* pData, int nSendCount)
 			}
 			else {
 				sprintf_s(szSendData, 4000, "{\"to\":\"%s\", \"priority\": \"high\", \
-						\"notification\" : {\"body\" : \"%s\",\"title\" : \"%s\"},\
-						\"data\" : {\"event\":\"%s\"},\
-							\"android\" : {	\"priority\":\"high\"},\
-								\"apns\" : {\"headers\":{\"apns-priority\":\"10\"}},\
-									\"webpush\" : {\"headers\": {\"Urgency\": \"high\"}}}"
+							\"notification\" : {\"body\" : \"%s\",\"title\" : \"%s\"},\
+							\"data\" : {\"event\":\"%s\"},\
+								\"android\" : {	\"priority\":\"high\"},\
+									\"apns\" : {\"headers\":{\"apns-priority\":\"10\"}},\
+										\"webpush\" : {\"headers\": {\"Urgency\": \"high\"}}}"
 					, mID, szBody, szTitle, pSendData);
 			}
 			HttpSendRequest(hReq, NULL, 0, (LPVOID)szSendData, strlen(szSendData));
@@ -724,11 +1085,201 @@ void CEventSend::SendAlarm(BYTE* pData, int nSendCount)
 			::InternetCloseHandle(hReq);
 			::InternetCloseHandle(hHttp);
 			::InternetCloseHandle(hConnect);
+
+			//20230320 GBM start - test
+#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
+			QueryPerformanceCounter(&endTime);
+			double duringTime;
+			duringTime = CCommonFunc::GetPreciseTime(startTime, endTime);
+			Log::Trace("사용자 %d, FCM Push Message 처리 시간 : %f", i, duringTime);
+#endif
+			//20230320 GBM end
 		}
 	}
 	free(pSendData);
 
-	//SAFE_DELETE(pData);
+	SAFE_DELETE(pData);
+
+	//20230320 GBM start - test
+#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
+	QueryPerformanceCounter(&endTime);
+	duringTime = CCommonFunc::GetPreciseTime(startTime, endTime);
+	Log::Trace("FCM Push Message 전체 처리 시간 : %f", duringTime);
+#endif
+	//20230320 GBM end
+
+	mIDSync.Leave();
+#endif
+//20230320 GBM end
+}
+
+void CEventSend::SendAlarmInParallel(BYTE* pData, int nSendCount)
+{
+	//
+	//20230320 GBM start - test
+#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
+	LARGE_INTEGER startTime, endTime;
+	QueryPerformanceCounter(&startTime);
+#endif
+	//20230320 GBM end
+
+	char szSendData[4000];
+
+	char strUtf8[4000] = { 0, };
+	int nLen;
+	char* pSendData;
+	char* mID = NULL;
+	char szTitle[64], szBody[128];
+
+	CTime   currTime;
+	CString strHeader;
+	CString strInputType;
+	CString sTemp;
+	LPVOID lpOutputBuffer = NULL;
+
+	DWORD dwLastTime = 0;
+
+	memset(szSendData, 0, 4000);
+	memset(strUtf8, 0x00, 4000);
+
+	currTime = CTime::GetCurrentTime();
+
+	CString strUni, sTitle, strName, strDisplay;
+
+	if (!CheckClassify(pData, strUni, sTitle, strName, strDisplay, nSendCount)) {
+		//SAFE_DELETE(pData);
+		//20230320 GBM start - test
+		Log::Trace("SendAlarm - CheckClassify 실패!");
+		CString strBuf = _T("");
+		for (int i = 0; i < SI_EVENT_BUF_SIZE; i++)
+		{
+			strBuf += pData[i];
+		}
+
+		Log::Trace("pData : [%s]", CCommonFunc::WCharToChar(strBuf.GetBuffer(0)));
+		//20230320 GBM end
+		return;
+	}
+
+	//---------------------------------------------------------------------------------------
+	nLen = WideCharToMultiByte(CP_UTF8, 0, strUni, lstrlenW(strUni), NULL, 0, NULL, NULL);
+	WideCharToMultiByte(CP_UTF8, 0, strUni, lstrlenW(strUni), strUtf8, nLen, NULL, NULL);
+
+	BOOL bJason = true;
+	if (bJason) {
+		strcpy_s(szBody, CCommonFunc::WcharToUtf8(strName.GetBuffer(0)));
+		strcpy_s(szTitle, CCommonFunc::WcharToUtf8(sTitle.GetBuffer(0)));
+	}
+
+	mIDSync.Enter();
+	int nCount = m_list.GetCount();
+	mIDSync.Leave();
+
+	// utf8 -> urlencode
+	pSendData = qURLencode(strUtf8);
+
+	mIDSync.Enter();
+	nCount = m_list.GetCount();
+	userInfo* pInfo = NULL;
+
+	//
+
+	HANDLE hConnect = InternetOpen(L"FCM", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+	if (hConnect == NULL)
+	{
+		mIDSync.Leave();
+		//SAFE_DELETE(pData);
+		return;
+	}
+
+	HANDLE hHttp = InternetConnect(hConnect, L"fcm.googleapis.com", INTERNET_DEFAULT_HTTPS_PORT, NULL, NULL, INTERNET_SERVICE_HTTP, 0, NULL);
+	if (hHttp == NULL)
+	{
+		InternetCloseHandle(hConnect);
+		hHttp = NULL;
+		mIDSync.Leave();
+		//SAFE_DELETE(pData);
+		return;
+	}
+
+	HANDLE hReq = HttpOpenRequest(hHttp, L"POST", L"/fcm/send", L"HTTP/1.1", NULL, NULL,
+		INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_SECURE | INTERNET_FLAG_IGNORE_CERT_CN_INVALID | INTERNET_FLAG_IGNORE_CERT_DATE_INVALID, 0);
+	if (hReq == NULL)
+	{
+		InternetCloseHandle(hConnect);
+		InternetCloseHandle(hHttp);
+		mIDSync.Leave();
+		//SAFE_DELETE(pData);
+		return;
+	}
+
+	if (!bJason) {
+		strHeader += "Content-Type:application/x-www-form-urlencoded;charset=UTF-8";
+	}
+	else {
+		strHeader += "Content-Type:application/json";
+	}
+	strHeader += "\r\n";
+	strHeader += "Authorization:key=";
+	strHeader += "AAAAfiAPpoM:APA91bEeX02UhoaqaGvTPffwhhp1y7VAY1PFDFiMfkANhYoEZqrSunBoaBGKoXKvnljDGrksIjUPniz7w2bCN7Lp9GABQovcTsbMbab_yYBXrvtb9DXBvIODfeopk4DLbsYJRgD9eDO4";
+	strHeader += "\r\n\r\n";
+
+	HttpAddRequestHeaders(hReq, strHeader, strHeader.GetAllocLength(), HTTP_ADDREQ_FLAG_REPLACE | HTTP_ADDREQ_FLAG_ADD);
+	//
+	ALARM_INFO ai[USER_MAX_COUNT];
+
+	for (int i = 0; i < nCount; i++)
+	{
+		m_hThread[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
+
+		ai[i].pDlg = this;
+		ai[i].pSendData = pSendData;
+		ai[i].userIndex = i;
+		ai[i].currTime = currTime;
+		ai[i].hReq = hReq;
+		ai[i].sTitle = sTitle;
+		ai[i].strUtf8 = strUtf8;
+		ai[i].szBody = szBody;
+		ai[i].szTitle = szTitle;
+		ai[i].bJason = bJason;
+
+		CWinThread* pThread = ::AfxBeginThread(SendAlarmThread, &ai[i]);
+	}
+
+	//스레드가 모두 종료되길 기다린다.
+	DWORD dw = WaitForMultipleObjects(nCount, m_hThread, true, INFINITE);
+	if (dw != WAIT_OBJECT_0)
+	{
+		Log::Trace("스레드 대기 실패!");
+	}
+
+	//각 스레드 처리가 모두 끝나면 각 핸들을 닫는다.
+	for (int i = 0; i < nCount; i++)
+	{
+		CloseHandle(m_hThread[i]);
+	}
+
+	free(mID);
+	::InternetCloseHandle(hReq);
+	::InternetCloseHandle(hHttp);
+	::InternetCloseHandle(hConnect);
+	free(pSendData);
+
+	SAFE_DELETE(pData);
+
+	//20230320 GBM start - test
+#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
+	QueryPerformanceCounter(&endTime);
+	double duringTime;
+	duringTime = CCommonFunc::GetPreciseTime(startTime, endTime);
+	Log::Trace("FCM Push Message 전체 처리 시간 : %f", duringTime);
+#endif
+	//20230320 GBM end
+
+// 	for (int i = 0; i < nCount; i++)
+// 	{
+// 		SAFE_DELETE(hList[i]);
+// 	}
 
 	mIDSync.Leave();
 }

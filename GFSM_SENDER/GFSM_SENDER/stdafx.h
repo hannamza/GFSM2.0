@@ -53,6 +53,9 @@ extern CGlobal Global;
 //20230207 GBM - 이벤트 테스트 플래그, 배포 시에는 주석처리
 //#define EVENT_TEST_MODE	
 
+//Push Message 시간 측정 테스트 플래그
+#define PUSH_MESSAGE_TIME_MEASURE_MODE
+
 //수신기 event 버퍼 구성
 enum {
 	SI_EVENT_BUF_COMPANY_1,
@@ -135,6 +138,9 @@ static const TCHAR g_lpszOccurInfo[] = {
 
 //회로 최대 개수
 #define CIRCUIT_MAX_COUNT	253
+
+//사용자(수신기 이벤트를 받을 인원) 최대 개수
+#define USER_MAX_COUNT	20
 
 //20230207 GBM end
 

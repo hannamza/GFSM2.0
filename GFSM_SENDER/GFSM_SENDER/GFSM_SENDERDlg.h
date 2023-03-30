@@ -34,6 +34,7 @@ private:
 	char m_szServerIP[32];
 	bool m_bAutoLogin;
 
+public:
 
 // 구현입니다.
 protected:
