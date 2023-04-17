@@ -80,6 +80,8 @@ private:
 	void SendAll();
 
 public:
-	void SendThreadLoop();
+	void SendThreadLoop();	
+	volatile long m_nSendCount;
+	BOOL m_bFirstEvent;
 };
 

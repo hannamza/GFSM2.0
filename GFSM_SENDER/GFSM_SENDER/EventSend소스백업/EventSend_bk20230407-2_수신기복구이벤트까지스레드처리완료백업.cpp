@@ -581,8 +581,6 @@ void CEventSend::ProcessEventQueue(queue<BYTE*> & queue, DWORD & dwValue, bool b
 
 		Log::Trace("SendCount = %d", m_nSendCount);
 
-		//20230410 GBM start - 프로그램 기동 후 최초는 순차 전송
-#if 1
 		if (m_bFirstEvent)
 		{
 			SendAlarm(pDataSave, nSize - 1);
@@ -592,10 +590,6 @@ void CEventSend::ProcessEventQueue(queue<BYTE*> & queue, DWORD & dwValue, bool b
 		{
 			SendAlarmInParallel(pDataSave, nSize - 1);
 		}
-#else
-		SendAlarm(pDataSave, nSize - 1);
-#endif
-		//20230410 GBM end
 	}
 
 	dwValue = 0;

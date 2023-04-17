@@ -161,6 +161,18 @@ void CWorksiteListCtrl::OnSize(UINT nType, int cx, int cy)
 	int nHeight = rect.Height();
 	int nWorksiteCount = ((nHeight / nWorksiteHeight) * 2) + 2;
 
+	//20230417 GBM start - 현재 현장 정보 리스트 개수만큼 UI리스트 항목을 생성 (기존 코드 오류 수정)
+#if 1
+	int nWorkSiteListCount = CWorksiteManager::Instance()->GetCount();
+
+	for (int nIndex = m_listWorksite.GetCount(); nIndex < nWorkSiteListCount; nIndex++)
+	{
+		CWorksite* pSite = new CWorksite(this);
+		pSite->Create(IDD_COMMON_CHILD_DLG, this);
+		pSite->ShowWindow(SW_HIDE);
+		m_listWorksite.AddTail(pSite);
+	}
+#else
 	for (int nIndex = nWorksiteCount; nIndex > m_listWorksite.GetCount(); nIndex)
 	{
 		CWorksite* pSite = new CWorksite(this);
@@ -168,6 +180,9 @@ void CWorksiteListCtrl::OnSize(UINT nType, int cx, int cy)
 		pSite->ShowWindow(SW_HIDE);
 		m_listWorksite.AddTail(pSite);
 	}
+#endif
+	//20230417 GBM end
+
 	if (m_pSlider)
 	{
 		m_pSlider->MoveWindow(rect.Width() - 13, 0, 13, rect.Height());
@@ -492,7 +507,7 @@ void CWorksiteListCtrl::Redisplay()
 	int nWorksiteCount = CWorksiteManager::Instance()->GetCount();
 	int nPos = 0, nLineH = 0;
 	int nWorksiteIndex = 0;
-	CWorksite* pSite;
+	CWorksite* pSite = nullptr;
 	pWorkSite pValue;
 	int nCount = 0;
 

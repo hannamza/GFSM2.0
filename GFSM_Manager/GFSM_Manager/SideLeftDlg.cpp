@@ -102,6 +102,7 @@ BOOL CSideLeftDlg::OnInitDialog()
 	m_pListCtrl->SendMessage(WM_INITIALUPDATE);
 
 	m_pListCtrl->MoveWindow(10, 40, 371, 540);
+
 	m_pListCtrl->ShowWindow(SW_SHOW);
 
 	m_btnSearch.SetBitmaps(Global.GetBitmap(IDX_BMP_BTN_BASE2), Global.GetRGB(IDX_RGB_MASK));

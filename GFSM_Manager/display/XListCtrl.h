@@ -321,6 +321,9 @@ protected:
 	CFont		*	m_pTextFont;
 	// JCW_+ 2008.04.12 END
 
+public:
+	CFont	m_listHeaderFont;		// 20230417 GBM - 윈도우 11에서 헤더 텍스트 삐져 나오는 현상없애기 위한 폰트
+
 protected:
 	void DrawCheckbox(int nItem, 
 					  int nSubItem, 

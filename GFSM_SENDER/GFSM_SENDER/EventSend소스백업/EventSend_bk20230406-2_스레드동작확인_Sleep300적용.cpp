@@ -53,9 +53,11 @@ char* qURLencode(char *str)
 
 typedef struct {
 	CEventSend* pDlg;
-	int userIndex;
-	CString sTitle;
 	char* pSendData;
+	int userIndex;
+	CTime currTime;
+	HANDLE hReq;
+	CString sTitle;
 	char* strUtf8;
 	char* szBody;
 	char* szTitle;
@@ -74,60 +76,21 @@ UINT SendAlarmThread(LPVOID param)
 	ALARM_INFO* pAi;
 	pAi = (ALARM_INFO*)param;
 	CEventSend* pDlg = pAi->pDlg;
-	int userIndex = pAi->userIndex;
 	char* pSendData = pAi->pSendData;
- 	CString sTitle = pAi->sTitle;
- 	char* strUtf8 = pAi->strUtf8;
+	int userIndex = pAi->userIndex;
+	CTime currTime = pAi->currTime;
+	HANDLE hReq = pAi->hReq;
+	CString sTitle = pAi->sTitle;
+	char* strUtf8 = pAi->strUtf8;
 	char* szBody = pAi->szBody;
 	char* szTitle = pAi->szTitle;
- 	BOOL bJason = pAi->bJason;
+	BOOL bJason = pAi->bJason;
+	
+	ResetEvent(pDlg->m_hThread[userIndex]);
 
 	char szSendData[4000];
-
-	int nLen;
-	//char* pSendData;
-	char* mID = NULL;
-
-	CTime   currTime;
-	CString strHeader;
-	CString strInputType;
-	CString sTemp;
-	LPVOID lpOutputBuffer = NULL;
-
-	DWORD dwLastTime = 0;
-
 	memset(szSendData, 0, 4000);
-	memset(strUtf8, 0x00, 4000);
-
-	currTime = CTime::GetCurrentTime();
-
-	//
-
-	HANDLE hConnect = InternetOpen(L"FCM", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
-	if (hConnect == NULL)
-	{
-		//SAFE_DELETE(pData);
-		return 0;
-	}
-
-	HANDLE hHttp = InternetConnect(hConnect, L"fcm.googleapis.com", INTERNET_DEFAULT_HTTPS_PORT, NULL, NULL, INTERNET_SERVICE_HTTP, 0, NULL);
-	if (hHttp == NULL)
-	{
-		InternetCloseHandle(hConnect);
-		hHttp = NULL;
-		//SAFE_DELETE(pData);
-		return 0;
-	}
-
-	HANDLE hReq = HttpOpenRequest(hHttp, L"POST", L"/fcm/send", L"HTTP/1.1", NULL, NULL,
-		INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_SECURE | INTERNET_FLAG_IGNORE_CERT_CN_INVALID | INTERNET_FLAG_IGNORE_CERT_DATE_INVALID, 0);
-	if (hReq == NULL)
-	{
-		InternetCloseHandle(hConnect);
-		InternetCloseHandle(hHttp);
-		//SAFE_DELETE(pData);
-		return 0;
-	}
+	CString strHeader = _T("");
 
 	//
 	userInfo* pInfo = pDlg->m_list.GetAt(pDlg->m_list.FindIndex(userIndex));
@@ -196,10 +159,6 @@ UINT SendAlarmThread(LPVOID param)
 		BOOL bSend = HttpSendRequest(hReq, NULL, 0, (LPVOID)szSendData, strlen(szSendData));
 		Log::Trace("%d 스레드 FCM Push Message 처리 완료! - 결과 : %d", userIndex, bSend);
 	}
-
-	::InternetCloseHandle(hReq);
-	::InternetCloseHandle(hHttp);
-	::InternetCloseHandle(hConnect);
 	//
 
 	//20230320 GBM start - test
@@ -229,7 +188,6 @@ CEventSend::CEventSend()
 	m_dwSpy = 0;
 
 	m_nSendCount = 0;
-	m_bFirstEvent = TRUE;
 }
 
 CEventSend::~CEventSend()
@@ -581,21 +539,8 @@ void CEventSend::ProcessEventQueue(queue<BYTE*> & queue, DWORD & dwValue, bool b
 
 		Log::Trace("SendCount = %d", m_nSendCount);
 
-		//20230410 GBM start - 프로그램 기동 후 최초는 순차 전송
-#if 1
-		if (m_bFirstEvent)
-		{
-			SendAlarm(pDataSave, nSize - 1);
-			m_bFirstEvent = FALSE;
-		}
-		else
-		{
-			SendAlarmInParallel(pDataSave, nSize - 1);
-		}
-#else
-		SendAlarm(pDataSave, nSize - 1);
-#endif
-		//20230410 GBM end
+		//SendAlarm(pDataSave, nSize - 1);
+		SendAlarmInParallel(pDataSave, nSize - 1);
 	}
 
 	dwValue = 0;
@@ -997,7 +942,7 @@ void CEventSend::SendAlarm(BYTE* pData, int nSendCount)
 	::InternetCloseHandle(hConnect);
 	free(pSendData);
 
-	//SAFE_DELETE(pData);
+	SAFE_DELETE(pData);
 
 	//20230320 GBM start - test
 #ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
@@ -1194,7 +1139,7 @@ void CEventSend::SendAlarm(BYTE* pData, int nSendCount)
 	}
 	free(pSendData);
 
-	//SAFE_DELETE(pData);
+	SAFE_DELETE(pData);
 
 	//20230320 GBM start - test
 #ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
@@ -1278,22 +1223,70 @@ void CEventSend::SendAlarmInParallel(BYTE* pData, int nSendCount)
 	nCount = m_list.GetCount();
 	userInfo* pInfo = NULL;
 
+	//
+
+	HANDLE hConnect = InternetOpen(L"FCM", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+	if (hConnect == NULL)
+	{
+		mIDSync.Leave();
+		//SAFE_DELETE(pData);
+		return;
+	}
+
+	HANDLE hHttp = InternetConnect(hConnect, L"fcm.googleapis.com", INTERNET_DEFAULT_HTTPS_PORT, NULL, NULL, INTERNET_SERVICE_HTTP, 0, NULL);
+	if (hHttp == NULL)
+	{
+		InternetCloseHandle(hConnect);
+		hHttp = NULL;
+		mIDSync.Leave();
+		//SAFE_DELETE(pData);
+		return;
+	}
+
+	HANDLE hReq = HttpOpenRequest(hHttp, L"POST", L"/fcm/send", L"HTTP/1.1", NULL, NULL,
+		INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_SECURE | INTERNET_FLAG_IGNORE_CERT_CN_INVALID | INTERNET_FLAG_IGNORE_CERT_DATE_INVALID, 0);
+	if (hReq == NULL)
+	{
+		InternetCloseHandle(hConnect);
+		InternetCloseHandle(hHttp);
+		mIDSync.Leave();
+		//SAFE_DELETE(pData);
+		return;
+	}
+
+// 	if (!bJason) {
+// 		strHeader += "Content-Type:application/x-www-form-urlencoded;charset=UTF-8";
+// 	}
+// 	else {
+// 		strHeader += "Content-Type:application/json";
+// 	}
+// 	strHeader += "\r\n";
+// 	strHeader += "Authorization:key=";
+// 	strHeader += "AAAAfiAPpoM:APA91bEeX02UhoaqaGvTPffwhhp1y7VAY1PFDFiMfkANhYoEZqrSunBoaBGKoXKvnljDGrksIjUPniz7w2bCN7Lp9GABQovcTsbMbab_yYBXrvtb9DXBvIODfeopk4DLbsYJRgD9eDO4";
+// 	strHeader += "\r\n\r\n";
+// 
+// 	HttpAddRequestHeaders(hReq, strHeader, strHeader.GetAllocLength(), HTTP_ADDREQ_FLAG_REPLACE | HTTP_ADDREQ_FLAG_ADD);
+	//
 	ALARM_INFO ai[USER_MAX_COUNT];
+
 	for (int i = 0; i < nCount; i++)
 	{
 		m_hThread[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 		ai[i].pDlg = this;
-		ai[i].userIndex = i;
- 		ai[i].sTitle = sTitle;
 		ai[i].pSendData = pSendData;
- 		ai[i].strUtf8 = strUtf8;
+		ai[i].userIndex = i;
+		ai[i].currTime = currTime;
+		ai[i].hReq = hReq;
+		ai[i].sTitle = sTitle;
+		ai[i].strUtf8 = strUtf8;
 		ai[i].szBody = szBody;
 		ai[i].szTitle = szTitle;
- 		ai[i].bJason = bJason;
+		ai[i].bJason = bJason;
 
 		CWinThread* pThread = ::AfxBeginThread(SendAlarmThread, &ai[i]);
 
+		Sleep(300);
 	}
 
 	//스레드가 모두 종료되길 기다린다.
@@ -1310,6 +1303,9 @@ void CEventSend::SendAlarmInParallel(BYTE* pData, int nSendCount)
 	}
 
 	free(mID);
+	::InternetCloseHandle(hReq);
+	::InternetCloseHandle(hHttp);
+	::InternetCloseHandle(hConnect);
 	free(pSendData);
 
 	//SAFE_DELETE(pData);
@@ -1322,6 +1318,11 @@ void CEventSend::SendAlarmInParallel(BYTE* pData, int nSendCount)
 	Log::Trace("FCM Push Message 전체 처리 시간 : %f", duringTime);
 #endif
 	//20230320 GBM end
+
+// 	for (int i = 0; i < nCount; i++)
+// 	{
+// 		SAFE_DELETE(hList[i]);
+// 	}
 
 	mIDSync.Leave();
 }
