@@ -35,6 +35,9 @@ private:
 	bool m_bAutoLogin;
 
 public:
+	//이벤트 테스트 기능용 변수
+	BYTE m_ringBuffer[(SI_EVENT_BUF_SIZE + 1) * 20000];
+	int m_nBufPos = 0;
 
 // 구현입니다.
 protected:

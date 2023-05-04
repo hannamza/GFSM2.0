@@ -82,6 +82,5 @@ private:
 public:
 	void SendThreadLoop();	
 	volatile long m_nSendCount;
-	BOOL m_bFirstEvent;
 };
 

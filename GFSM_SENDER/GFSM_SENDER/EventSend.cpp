@@ -56,7 +56,6 @@ typedef struct {
 	int userIndex;
 	CString sTitle;
 	char* pSendData;
-	char* strUtf8;
 	char* szBody;
 	char* szTitle;
 	BOOL bJason;
@@ -77,15 +76,11 @@ UINT SendAlarmThread(LPVOID param)
 	int userIndex = pAi->userIndex;
 	char* pSendData = pAi->pSendData;
  	CString sTitle = pAi->sTitle;
- 	char* strUtf8 = pAi->strUtf8;
 	char* szBody = pAi->szBody;
 	char* szTitle = pAi->szTitle;
  	BOOL bJason = pAi->bJason;
 
-	char szSendData[4000];
-
 	int nLen;
-	//char* pSendData;
 	char* mID = NULL;
 
 	CTime   currTime;
@@ -96,8 +91,10 @@ UINT SendAlarmThread(LPVOID param)
 
 	DWORD dwLastTime = 0;
 
+	char* szSendData = new char[4000];
 	memset(szSendData, 0, 4000);
-	memset(strUtf8, 0x00, 4000);
+	char* strUtf8 = new char[4000];
+	memset(strUtf8, 0, 4000);
 
 	currTime = CTime::GetCurrentTime();
 
@@ -184,17 +181,21 @@ UINT SendAlarmThread(LPVOID param)
 		}
 		else {
 			sprintf_s(szSendData, 4000, "{\"to\":\"%s\", \"priority\": \"high\", \
-						\"notification\" : {\"body\" : \"%s\",\"title\" : \"%s\"},\
-						\"data\" : {\"event\":\"%s\"},\
-							\"android\" : {	\"priority\":\"high\"},\
-								\"apns\" : {\"headers\":{\"apns-priority\":\"10\"}},\
-									\"webpush\" : {\"headers\": {\"Urgency\": \"high\"}}}"
+							\"notification\" : {\"body\" : \"%s\",\"title\" : \"%s\", \"sound\" : \"default\"},\
+							\"data\" : {\"event\":\"%s\"},\
+								\"android\" : {	\"priority\":\"high\"},\
+									\"apns\" : {\"headers\":{\"apns-priority\":\"10\"}},\
+										\"webpush\" : {\"headers\": {\"Urgency\": \"high\"}}}"
 				, mID, szBody, szTitle, pSendData);
+
+			Log::Trace("%d스레드 : %s", userIndex, szSendData);
 		}
 		//
 
 		BOOL bSend = HttpSendRequest(hReq, NULL, 0, (LPVOID)szSendData, strlen(szSendData));
 		Log::Trace("%d 스레드 FCM Push Message 처리 완료! - 결과 : %d", userIndex, bSend);
+
+		delete mID;
 	}
 
 	::InternetCloseHandle(hReq);
@@ -209,6 +210,11 @@ UINT SendAlarmThread(LPVOID param)
 	Log::Trace("%d 스레드 FCM Push Message 처리 시간 : %f", userIndex, duringTime);
 #endif
 	//20230320 GBM end
+
+	//
+	delete[] szSendData;
+	delete[] strUtf8;
+	//
 
 	SetEvent(pDlg->m_hThread[userIndex]);
 
@@ -229,7 +235,6 @@ CEventSend::CEventSend()
 	m_dwSpy = 0;
 
 	m_nSendCount = 0;
-	m_bFirstEvent = TRUE;
 }
 
 CEventSend::~CEventSend()
@@ -581,17 +586,9 @@ void CEventSend::ProcessEventQueue(queue<BYTE*> & queue, DWORD & dwValue, bool b
 
 		Log::Trace("SendCount = %d", m_nSendCount);
 
-		//20230410 GBM start - 프로그램 기동 후 최초는 순차 전송
+		//20230410 GBM start - 프로그램 기동 후 최초는 순차 전송 -> 20230420 GBM - 스레드간 토큰 값이 겹치는 현상을 버퍼 동적할당으로 해결 후 처음부터 병렬 전송으로 전송해도 OK
 #if 1
-		if (m_bFirstEvent)
-		{
-			SendAlarm(pDataSave, nSize - 1);
-			m_bFirstEvent = FALSE;
-		}
-		else
-		{
-			SendAlarmInParallel(pDataSave, nSize - 1);
-		}
+		SendAlarmInParallel(pDataSave, nSize - 1);
 #else
 		SendAlarm(pDataSave, nSize - 1);
 #endif
@@ -793,8 +790,8 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 
 void CEventSend::SendAlarm(BYTE* pData, int nSendCount)
 {
-	//20233020 GBM start - test 1:초기화 루틴 분리, 2:기존 루틴
-#if 1
+	//20233020 GBM start - test 1:초기화 루틴 분리, 2:기존 루틴 -> 20230420 GBM - 20인 테스트 시 잘 안되서 순차처리 방식으로 회귀
+#if 0
 	//
 	//20230320 GBM start - test
 #ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
@@ -971,7 +968,7 @@ void CEventSend::SendAlarm(BYTE* pData, int nSendCount)
 				sprintf_s(szSendData, 4000, "{\"to\":\"%s\", \"priority\": \"high\", \
 						\"notification\" : {\"body\" : \"%s\",\"title\" : \"%s\"},\
 						\"data\" : {\"event\":\"%s\"},\
-							\"android\" : {	\"priority\":\"high\"},\
+							\"android\" : {\"priority\":\"high\"},\
 								\"apns\" : {\"headers\":{\"apns-priority\":\"10\"}},\
 									\"webpush\" : {\"headers\": {\"Urgency\": \"high\"}}}"
 					, mID, szBody, szTitle, pSendData);
@@ -1166,7 +1163,7 @@ void CEventSend::SendAlarm(BYTE* pData, int nSendCount)
 			}
 			else {
 				sprintf_s(szSendData, 4000, "{\"to\":\"%s\", \"priority\": \"high\", \
-							\"notification\" : {\"body\" : \"%s\",\"title\" : \"%s\"},\
+							\"notification\" : {\"body\" : \"%s\",\"title\" : \"%s\", \"sound\" : \"default\"},\
 							\"data\" : {\"event\":\"%s\"},\
 								\"android\" : {	\"priority\":\"high\"},\
 									\"apns\" : {\"headers\":{\"apns-priority\":\"10\"}},\
@@ -1276,7 +1273,6 @@ void CEventSend::SendAlarmInParallel(BYTE* pData, int nSendCount)
 
 	mIDSync.Enter();
 	nCount = m_list.GetCount();
-	userInfo* pInfo = NULL;
 
 	ALARM_INFO ai[USER_MAX_COUNT];
 	for (int i = 0; i < nCount; i++)
@@ -1287,17 +1283,17 @@ void CEventSend::SendAlarmInParallel(BYTE* pData, int nSendCount)
 		ai[i].userIndex = i;
  		ai[i].sTitle = sTitle;
 		ai[i].pSendData = pSendData;
- 		ai[i].strUtf8 = strUtf8;
 		ai[i].szBody = szBody;
 		ai[i].szTitle = szTitle;
  		ai[i].bJason = bJason;
 
 		CWinThread* pThread = ::AfxBeginThread(SendAlarmThread, &ai[i]);
+		Sleep(250);		// FCM에서 Push Message 처리 시간을 위해 순차적 Delay를 줘서 핸드폰 알람 수신 안정화
 
 	}
 
 	//스레드가 모두 종료되길 기다린다.
-	DWORD dw = WaitForMultipleObjects(nCount, m_hThread, true, 3000);
+	DWORD dw = WaitForMultipleObjects(nCount, m_hThread, true, 15000 + (250 * nCount));		// 테스트에서 나온 가장 Worst Time이 15초, 각 사용자별로 250밀리세컨트 Sleep 반영 시간
 	if (dw != WAIT_OBJECT_0)
 	{
 		Log::Trace("스레드 대기 실패! dw : %d", dw);
