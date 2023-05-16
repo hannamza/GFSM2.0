@@ -646,9 +646,6 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 	CString strUnitNum;
 	CString strLoopNum;
 	CString strLineNum;
-	CString strOccurType;
-
-	CString strDisplay2;
 
 	CString strPosition;
 	CString strFirst;
@@ -665,8 +662,13 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 	if ('R' == pData[2])
 	{
 		sUni = L"R";
+#ifndef ENGLISH_MODE
 		sTitle = L"복구 완료";
 		sName = L"수신기 복구";
+#else
+		sTitle = L"RESTORATION COMPLETION";
+		sName = L"FACP RESTORATION";
+#endif
 	}
 	else
 	{
@@ -691,40 +693,68 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 
 		if ('R' == pData[2])
 		{
+#ifndef ENGLISH_MODE
 			strPosition = L"복구 완료";
+#else
+			strPosition = L"RESTORATION COMPLETION";
+#endif
 		}
 		else if ('T' == pData[2])
 		{
+#ifndef ENGLISH_MODE
 			strPosition = L"단선";
+#else
+			strPosition = L"TROUBLE";
+#endif
 			strSecond.Format(L"03x");
 		}
 		else if ('F' == pData[2])
 		{
 			if (strType == "0")
 			{
+#ifndef ENGLISH_MODE
 				strPosition = L"화재";
+#else
+				strPosition = L"ALARM";
+#endif
 				strSecond.Format(L"00x");
 			}
 			else
 			{
+#ifndef ENGLISH_MODE
 				strPosition = L"감시";
+#else
+				strPosition = L"SUPERVISORY";
+#endif
 				strSecond.Format(L"02x");
 			}
 
 			if (L"63" == strUnitNum)
 			{
+#ifndef ENGLISH_MODE
 				strPosition = L"감시";
+#else
+				strPosition = L"SUPERVISORY";
+#endif
 				strSecond.Format(L"02x");
 			}
 		}
 		else if ('S' == pData[2])
 		{
+#ifndef ENGLISH_MODE
 			strPosition = L"감시";
+#else
+			strPosition = L"SUPERVISORY";
+#endif
 			strSecond.Format(L"02x");
 		}
 		else if ('G' == pData[2])
 		{
+#ifndef ENGLISH_MODE
 			strPosition = L"가스";
+#else
+			strPosition = L"GAS";
+#endif
 			strSecond.Format(L"01x");
 		}
 		else
@@ -735,18 +765,24 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 		sTitle = strPosition;
 		if (pData[12] == 'N')
 		{
-			strOccurType.Format(L"%s", L"발생");
+#ifndef ENGLISH_MODE
 			if (sTitle != L"복구 완료") {
 				sTitle += L" 발생";
 			}
+#endif
 			strFirst.Format(L"Ax");
 		}
 		else
 		{
-			strOccurType.Format(L"%s", L"복구");
+#ifndef ENGLISH_MODE
 			if (sTitle != L"복구 완료") {
 				sTitle += L" 복구";
 			}
+#else
+			if (sTitle != L"RESTORATION COMPLETION") {
+				sTitle += L" RESTORATION";
+			}
+#endif
 			strFirst.Format(L"Dx");
 		}
 
@@ -754,13 +790,6 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 			strFirst, strSecond,
 			currTime.GetYear(), currTime.GetMonth(), currTime.GetDay(),
 			currTime.GetHour(), currTime.GetMinute(), currTime.GetSecond(),
-			strFACPNum, strUnitNum, strLoopNum, strLineNum,
-			sName);
-
-		strDisplay2.Format(L"%d/%02d/%02d %02d:%02d:%02d %s %s (%s-%s-%s-%s) : %s",
-			currTime.GetYear(), currTime.GetMonth(), currTime.GetDay(),
-			currTime.GetHour(), currTime.GetMinute(), currTime.GetSecond(),
-			strPosition, strOccurType,
 			strFACPNum, strUnitNum, strLoopNum, strLineNum,
 			sName);
 	}
@@ -774,8 +803,13 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 
 	if ("R" == sUni)
 	{
+#ifndef ENGLISH_MODE
 		sUni.Format(L"Rx%d/%02d/%02d %02d:%02d:%02dx수신기 복구", currTime.GetYear(), currTime.GetMonth(), currTime.GetDay(),
 			currTime.GetHour(), currTime.GetMinute(), currTime.GetSecond());
+#else
+		sUni.Format(L"Rx%d/%02d/%02d %02d:%02d:%02dxFACP RESTORATION", currTime.GetYear(), currTime.GetMonth(), currTime.GetDay(),
+			currTime.GetHour(), currTime.GetMinute(), currTime.GetSecond());
+#endif
 		strcpy_s(szLog, CCommonFunc::WCharToChar(sUni.GetBuffer(0)));
 		//Log::Trace(szLog);
 	}

@@ -240,3 +240,15 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+/Debug_ENG
+/FCMTest/FCMTest/Debug_ENG
+/FCMTest/FCMTest/Release_ENG
+/GFSM_Manager/GFSM_Manager/Debug_ENG
+/GFSM_Manager/GFSM_Manager/Release_ENG
+/GFSM_User/GFSM_User/Debug_ENG
+/GFSM_User/GFSM_User/Release_ENG
+/LogRemover/LogRemover/Debug_ENG
+/LogRemover/LogRemover/Release_ENG
+/Release_ENG
+/WatchDog/WatchDog/Debug_ENG
+/WatchDog/WatchDog/Release_ENG
