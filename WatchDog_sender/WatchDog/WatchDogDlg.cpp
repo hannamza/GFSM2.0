@@ -230,7 +230,7 @@ void CWatchDogDlg::OnTimer(UINT_PTR nIDEvent)
 	if (nIDEvent == 1)
 	{
 		KillTimer(1);
-		MoveWindow(0, 0, 456, 310);
+		//MoveWindow(0, 0, 456, 310);
 		PostMessage(STATE_MSG, 0, 0);
 	}
 	else if (nIDEvent == 2)
@@ -464,5 +464,5 @@ void CWatchDogDlg::OnWindowPosChanging(WINDOWPOS* lpwndpos)
 	CDialogEx::OnWindowPosChanging(lpwndpos);
 
 	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
-	lpwndpos->flags &= ~SWP_SHOWWINDOW;
+	//lpwndpos->flags &= ~SWP_SHOWWINDOW;
 }
