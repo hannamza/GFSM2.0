@@ -290,9 +290,9 @@ void CMainTopDlg::OnBnClickedButtonAdd()
 		dlg.DoModal();
 		return;
 	}
-	if (nLimit > 30)
+	if (nLimit > 20)
 	{
-		CMessagePopup dlg(L"계정 관리", L"사용자 제한(최대 사용자 수)은 최대 30명까지 입력 가능합니다.", MB_OK, this);
+		CMessagePopup dlg(L"계정 관리", L"사용자 제한(최대 사용자 수)은 최대 20명까지 입력 가능합니다.", MB_OK, this);
 		dlg.DoModal();
 		return;
 	}
@@ -338,9 +338,9 @@ void CMainTopDlg::OnBnClickedButtonMod()
 		dlg.DoModal();
 		return;
 	}
-	if (nLimit > 100)
+	if (nLimit > 20)
 	{
-		CMessagePopup dlg(L"계정 관리", L"최대 사용자 수는 최대 100명까지 입력 가능합니다.", MB_OK, this);
+		CMessagePopup dlg(L"계정 관리", L"최대 사용자 수는 최대 20명까지 입력 가능합니다.", MB_OK, this);
 		dlg.DoModal();
 		return;
 	}
