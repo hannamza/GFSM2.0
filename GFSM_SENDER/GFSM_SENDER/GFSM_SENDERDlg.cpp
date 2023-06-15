@@ -9,6 +9,7 @@
 #include "LoginDlg.h"
 #include "ReadWriteState.h"
 #include "DlgEventTest.h"
+#include "DlgPW.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -65,6 +66,8 @@ CGFSM_SENDERDlg::CGFSM_SENDERDlg(CWnd* pParent /*=NULL*/)
 	memset(m_ringBuffer, 0, (SI_EVENT_BUF_SIZE + 1) * 20000);
 	m_nBufPos = 0;
 	//20230420 GBM end
+
+	m_bAdminMode = FALSE;
 }
 
 void CGFSM_SENDERDlg::DoDataExchange(CDataExchange* pDX)
@@ -821,6 +824,28 @@ void CGFSM_SENDERDlg::OnBnClickedButtonEvent()
 
 	//20230420 GBM start - 메모리 누수 방지를 위해 링버퍼로 구성 변경
 #if 1
+	if (!m_bAdminMode)
+	{
+		CDlgPW dlgPW;
+		if (dlgPW.DoModal() == IDOK)
+		{
+			if (dlgPW.m_strPW.Compare(_T("gfsadmin1234!")) == 0)
+			{
+				AfxMessageBox(_T("관리자 모드로 변경되었습니다.\r\n이후에는 암호 입력없이 이벤트 테스트 기능을 사용할 수 있습니다."));
+				m_bAdminMode = TRUE;
+			}
+			else
+			{
+				AfxMessageBox(_T("잘못된 암호입니다."));
+				return;
+			}
+		}
+		else
+		{
+			return;
+		}
+	}
+
 	BYTE* pData = nullptr;
 	CDlgEventTest dlg;
 	if (dlg.DoModal() == IDOK)

@@ -132,6 +132,9 @@
     <ClInclude Include="DlgEventTest.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="DlgPW.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GFSM_SENDER.cpp">
@@ -219,6 +222,9 @@
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="DlgEventTest.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgPW.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

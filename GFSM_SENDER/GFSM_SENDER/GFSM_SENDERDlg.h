@@ -39,6 +39,8 @@ public:
 	BYTE m_ringBuffer[(SI_EVENT_BUF_SIZE + 1) * 20000];
 	int m_nBufPos = 0;
 
+	//관리자 모드
+	BOOL m_bAdminMode;
 // 구현입니다.
 protected:
 	HICON m_hIcon;
