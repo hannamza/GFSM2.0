@@ -807,7 +807,7 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 		sUni.Format(L"Rx%d/%02d/%02d %02d:%02d:%02dx수신기 복구", currTime.GetYear(), currTime.GetMonth(), currTime.GetDay(),
 			currTime.GetHour(), currTime.GetMinute(), currTime.GetSecond());
 #else
-		sUni.Format(L"Rx%d/%02d/%02d %02d:%02d:%02dxFACP RESTORATION", currTime.GetYear(), currTime.GetMonth(), currTime.GetDay(),
+		sUni.Format(L"Rx%d/%02d/%02d %02d:%02d:%02dxFACP Restored", currTime.GetYear(), currTime.GetMonth(), currTime.GetDay(),
 			currTime.GetHour(), currTime.GetMinute(), currTime.GetSecond());
 #endif
 		strcpy_s(szLog, CCommonFunc::WCharToChar(sUni.GetBuffer(0)));
