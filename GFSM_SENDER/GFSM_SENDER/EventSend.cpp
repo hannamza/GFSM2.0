@@ -663,11 +663,11 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 	{
 		sUni = L"R";
 #ifndef ENGLISH_MODE
-		sTitle = L"복구 완료";
-		sName = L"수신기 복구";
+		sTitle = L"수신기 복구";
+		sName = L"";
 #else
-		sTitle = L"RESTORATION COMPLETION";
-		sName = L"FACP RESTORATION";
+		sTitle = L"FACP Restored";
+		sName = L"";
 #endif
 	}
 	else
@@ -694,9 +694,9 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 		if ('R' == pData[2])
 		{
 #ifndef ENGLISH_MODE
-			strPosition = L"복구 완료";
+			strPosition = L"수신기 복구";
 #else
-			strPosition = L"RESTORATION COMPLETION";
+			strPosition = L"FACP Restored";
 #endif
 		}
 		else if ('T' == pData[2])
@@ -704,7 +704,7 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 #ifndef ENGLISH_MODE
 			strPosition = L"단선";
 #else
-			strPosition = L"TROUBLE";
+			strPosition = L"Trouble";
 #endif
 			strSecond.Format(L"03x");
 		}
@@ -715,7 +715,7 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 #ifndef ENGLISH_MODE
 				strPosition = L"화재";
 #else
-				strPosition = L"ALARM";
+				strPosition = L"Alarm";
 #endif
 				strSecond.Format(L"00x");
 			}
@@ -724,7 +724,7 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 #ifndef ENGLISH_MODE
 				strPosition = L"감시";
 #else
-				strPosition = L"SUPERVISORY";
+				strPosition = L"Supervisory";
 #endif
 				strSecond.Format(L"02x");
 			}
@@ -734,7 +734,7 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 #ifndef ENGLISH_MODE
 				strPosition = L"감시";
 #else
-				strPosition = L"SUPERVISORY";
+				strPosition = L"Supervisory";
 #endif
 				strSecond.Format(L"02x");
 			}
@@ -744,7 +744,7 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 #ifndef ENGLISH_MODE
 			strPosition = L"감시";
 #else
-			strPosition = L"SUPERVISORY";
+			strPosition = L"Supervisory";
 #endif
 			strSecond.Format(L"02x");
 		}
@@ -753,7 +753,7 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 #ifndef ENGLISH_MODE
 			strPosition = L"가스";
 #else
-			strPosition = L"GAS";
+			strPosition = L"Gas";
 #endif
 			strSecond.Format(L"01x");
 		}
@@ -766,7 +766,7 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 		if (pData[12] == 'N')
 		{
 #ifndef ENGLISH_MODE
-			if (sTitle != L"복구 완료") {
+			if (sTitle != L"수신기 복구") {
 				sTitle += L" 발생";
 			}
 #endif
@@ -775,12 +775,12 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 		else
 		{
 #ifndef ENGLISH_MODE
-			if (sTitle != L"복구 완료") {
+			if (sTitle != L"수신기 복구") {
 				sTitle += L" 복구";
 			}
 #else
-			if (sTitle != L"RESTORATION COMPLETION") {
-				sTitle += L" RESTORATION";
+			if (sTitle != L"FACP Restored") {
+				sTitle += L" Restored";
 			}
 #endif
 			strFirst.Format(L"Dx");
