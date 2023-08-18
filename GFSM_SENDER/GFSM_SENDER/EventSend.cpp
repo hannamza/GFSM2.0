@@ -1638,6 +1638,10 @@ void CEventSend::SendAlarmAtOnce(BYTE* pData, int nSendCount)
 		strFRIs = sRecv.Mid(nStartBracketPos, nEndBracketPos - nStartBracketPos + 1);
 
 		//6. 위에서 HttpSendRequest 문자열 만드는 걸 이용해서 registration_ids 정보를 5에서 얻은 문자열로 채우고 다시 HttpSendRequest를 실행
+		memset(szRegistrationIds, 0, 84000);
+		nLen = WideCharToMultiByte(CP_UTF8, 0, /*m_IDList[i]*/strFRIs, lstrlenW(strFRIs), NULL, 0, NULL, NULL);
+		WideCharToMultiByte(CP_UTF8, 0, strFRIs, lstrlenW(strFRIs), szRegistrationIds, nLen, NULL, NULL);
+
 		memset(szSendData, 0, 88000);
 		if (!bJason) {
 			sprintf_s(szSendData, 88000, "&priority=high&%s%s&registration_id=%s", "data=", pSendData, strFRIs);
@@ -1649,7 +1653,7 @@ void CEventSend::SendAlarmAtOnce(BYTE* pData, int nSendCount)
 						\"android\" : {\"priority\":\"high\"},\
 							\"apns\" : {\"headers\":{\"apns-priority\":\"10\"}},\
 								\"webpush\" : {\"headers\": {\"Urgency\": \"high\"}}}"
-				, strFRIs, szBody, szTitle, pSendData);
+				, szRegistrationIds, szBody, szTitle, pSendData);
 		}
 		//
 
