@@ -1371,11 +1371,11 @@ void CEventSend::SendAlarmAtOnce(BYTE* pData, int nSendCount)
 #endif
 	//20230320 GBM end
 
-	//기존에 4000에서 registration_ids에 최대 1000명까지 가능하므로 토큰 한 문자열이 84이므로 84 * 1000 + 4000의 크기로 정한다.
-	char szSendData[88000];
+	//기존에 4000에서 registration_ids에 최대 1000명까지 가능하므로 토큰 한 문자열이 163, 따옴표 둘, 공백까지 이므로 166 * 1000 + 4000의 크기로 정한다.
+	char szSendData[170000];
 
-	char szRegistrationIds[84000];
-	memset(szRegistrationIds, 0, 84000);
+	char szRegistrationIds[166000];
+	memset(szRegistrationIds, 0, 166000);
 
 	char strUtf8[4000] = { 0, };
 	int nLen;
@@ -1391,7 +1391,7 @@ void CEventSend::SendAlarmAtOnce(BYTE* pData, int nSendCount)
 
 	DWORD dwLastTime = 0;
 
-	memset(szSendData, 0, 88000);
+	memset(szSendData, 0, 170000);
 	memset(strUtf8, 0x00, 4000);
 
 	currTime = CTime::GetCurrentTime();
@@ -1556,11 +1556,11 @@ void CEventSend::SendAlarmAtOnce(BYTE* pData, int nSendCount)
 	//
 
 	if (!bJason) {
-		sprintf_s(szSendData, 88000, "&priority=high&%s%s&registration_id=%s", "data=", pSendData, szRegistrationIds);
+		sprintf_s(szSendData, 170000, "&priority=high&%s%s&registration_id=%s", "data=", pSendData, szRegistrationIds);
 	}
 	else {
 		//지금은 위에서 토큰 배열에 들어가는 따옴표까지 qURLencode하는데 따옴표를 변환하지 않고 문자열에 붙이고 시도해 볼 것
-		sprintf_s(szSendData, 88000, "{\"registration_ids\": [%s], \"priority\": \"high\", \
+		sprintf_s(szSendData, 170000, "{\"registration_ids\": [%s], \"priority\": \"high\", \
 					\"notification\" : {\"body\" : \"%s\",\"title\" : \"%s\"},\
 					\"data\" : {\"event\":\"%s\"},\
 						\"android\" : {\"priority\":\"high\"},\
@@ -1583,7 +1583,7 @@ void CEventSend::SendAlarmAtOnce(BYTE* pData, int nSendCount)
 
 	//20230816 GBM start - 응답 받기
 	DWORD dwByteRead = 0;
-	DWORD bufSize = 88000;
+	DWORD bufSize = 170000;
 	char* pszBuf = NULL;
 	CString sRecv = _T("");
 	CString strTemp = _T("");
@@ -1638,16 +1638,16 @@ void CEventSend::SendAlarmAtOnce(BYTE* pData, int nSendCount)
 		strFRIs = sRecv.Mid(nStartBracketPos, nEndBracketPos - nStartBracketPos + 1);
 
 		//6. 위에서 HttpSendRequest 문자열 만드는 걸 이용해서 registration_ids 정보를 5에서 얻은 문자열로 채우고 다시 HttpSendRequest를 실행
-		memset(szRegistrationIds, 0, 84000);
+		memset(szRegistrationIds, 0, 166000);
 		nLen = WideCharToMultiByte(CP_UTF8, 0, /*m_IDList[i]*/strFRIs, lstrlenW(strFRIs), NULL, 0, NULL, NULL);
 		WideCharToMultiByte(CP_UTF8, 0, strFRIs, lstrlenW(strFRIs), szRegistrationIds, nLen, NULL, NULL);
 
-		memset(szSendData, 0, 88000);
+		memset(szSendData, 0, 170000);
 		if (!bJason) {
-			sprintf_s(szSendData, 88000, "&priority=high&%s%s&registration_id=%s", "data=", pSendData, strFRIs);
+			sprintf_s(szSendData, 170000, "&priority=high&%s%s&registration_id=%s", "data=", pSendData, strFRIs);
 		}
 		else {
-			sprintf_s(szSendData, 88000, "{\"registration_ids\": %s, \"priority\": \"high\", \
+			sprintf_s(szSendData, 170000, "{\"registration_ids\": %s, \"priority\": \"high\", \
 					\"notification\" : {\"body\" : \"%s\",\"title\" : \"%s\"},\
 					\"data\" : {\"event\":\"%s\"},\
 						\"android\" : {\"priority\":\"high\"},\
