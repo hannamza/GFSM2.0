@@ -1644,7 +1644,7 @@ void CEventSend::SendAlarmAtOnce(BYTE* pData, int nSendCount)
 
 		memset(szSendData, 0, 170000);
 		if (!bJason) {
-			sprintf_s(szSendData, 170000, "&priority=high&%s%s&registration_id=%s", "data=", pSendData, strFRIs);
+			sprintf_s(szSendData, 170000, "&priority=high&%s%s&registration_id=%s", "data=", pSendData, szRegistrationIds);
 		}
 		else {
 			sprintf_s(szSendData, 170000, "{\"registration_ids\": %s, \"priority\": \"high\", \
