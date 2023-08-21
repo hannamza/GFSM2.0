@@ -1561,7 +1561,7 @@ void CEventSend::SendAlarmAtOnce(BYTE* pData, int nSendCount)
 	else {
 		//지금은 위에서 토큰 배열에 들어가는 따옴표까지 qURLencode하는데 따옴표를 변환하지 않고 문자열에 붙이고 시도해 볼 것
 		sprintf_s(szSendData, 170000, "{\"registration_ids\": [%s], \"priority\": \"high\", \
-					\"notification\" : {\"body\" : \"%s\",\"title\" : \"%s\"},\
+					\"notification\" : {\"body\" : \"%s\",\"title\" : \"%s\", \"sound\" : \"default\"},\
 					\"data\" : {\"event\":\"%s\"},\
 						\"android\" : {\"priority\":\"high\"},\
 							\"apns\" : {\"headers\":{\"apns-priority\":\"10\"}},\
@@ -1648,7 +1648,7 @@ void CEventSend::SendAlarmAtOnce(BYTE* pData, int nSendCount)
 		}
 		else {
 			sprintf_s(szSendData, 170000, "{\"registration_ids\": %s, \"priority\": \"high\", \
-					\"notification\" : {\"body\" : \"%s\",\"title\" : \"%s\"},\
+					\"notification\" : {\"body\" : \"%s\",\"title\" : \"%s\", \"sound\" : \"default\"},\
 					\"data\" : {\"event\":\"%s\"},\
 						\"android\" : {\"priority\":\"high\"},\
 							\"apns\" : {\"headers\":{\"apns-priority\":\"10\"}},\
