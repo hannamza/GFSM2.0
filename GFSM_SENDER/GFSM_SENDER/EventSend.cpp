@@ -225,6 +225,192 @@ UINT SendAlarmThread(LPVOID param)
 	return 0;
 }
 
+//20231129 GBM start - OAuth2 테스트를 위한 스레드
+UINT SendAlarmWithOAuth2Thread(LPVOID param)
+{
+	//20230320 GBM start - test
+#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
+	LARGE_INTEGER startTime, endTime;
+	QueryPerformanceCounter(&startTime);
+#endif
+	//20230320 GBM end
+
+	ALARM_INFO* pAi;
+	pAi = (ALARM_INFO*)param;
+	CEventSend* pDlg = pAi->pDlg;
+	int userIndex = pAi->userIndex;
+	char* pSendData = pAi->pSendData;
+	CString sTitle = pAi->sTitle;
+	char* szBody = pAi->szBody;
+	char* szTitle = pAi->szTitle;
+	BOOL bJason = pAi->bJason;
+
+	int nLen;
+	char* mID = NULL;
+
+	CTime   currTime;
+	CString strHeader;
+	CString strInputType;
+	CString sTemp;
+	LPVOID lpOutputBuffer = NULL;
+
+	DWORD dwLastTime = 0;
+
+	char* szSendData = new char[8000];
+	memset(szSendData, 0, 8000);
+	char* strUtf8 = new char[8000];
+	memset(strUtf8, 0, 8000);
+
+	currTime = CTime::GetCurrentTime();
+
+	//
+
+	HANDLE hConnect = InternetOpen(L"FCM", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+	if (hConnect == NULL)
+	{
+		//SAFE_DELETE(pData);
+		return 0;
+	}
+
+	HANDLE hHttp = InternetConnect(hConnect, L"fcm.googleapis.com", INTERNET_DEFAULT_HTTPS_PORT, NULL, NULL, INTERNET_SERVICE_HTTP, 0, NULL);
+	if (hHttp == NULL)
+	{
+		InternetCloseHandle(hConnect);
+		hHttp = NULL;
+		//SAFE_DELETE(pData);
+		return 0;
+	}
+
+	HANDLE hReq = HttpOpenRequest(hHttp, L"POST", L"/v1/projects/gfssmartalertservice/messages:send", L"HTTP/1.1", NULL, NULL,
+		INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_SECURE | INTERNET_FLAG_IGNORE_CERT_CN_INVALID | INTERNET_FLAG_IGNORE_CERT_DATE_INVALID, 0);
+	if (hReq == NULL)
+	{
+		InternetCloseHandle(hConnect);
+		InternetCloseHandle(hHttp);
+		//SAFE_DELETE(pData);
+		return 0;
+	}
+
+	//
+	userInfo* pInfo = pDlg->m_list.GetAt(pDlg->m_list.FindIndex(userIndex));
+	if (!pInfo) {
+		return 0;
+	}
+	if (pInfo->nUseTime) {
+		if (pInfo->nHour > currTime.GetHour() || pInfo->nEndHour < currTime.GetHour()
+			|| (pInfo->nHour == currTime.GetHour() && pInfo->nMin > currTime.GetMinute())
+			|| (pInfo->nEndHour == currTime.GetHour() && pInfo->nEndMin < currTime.GetMinute()))
+		{
+			return 0;
+		}
+	}
+	if (!pInfo->nAlert) {
+		return 0;
+	}
+	if (sTitle.Find(L"화재") >= 0 && pInfo->nFire == 0) {
+		return 0;
+	}
+	if (sTitle.Find(L"가스") >= 0 && pInfo->nGas == 0) {
+		return 0;
+	}
+	if (sTitle.Find(L"감시") >= 0 && pInfo->nSpy == 0) {
+		return 0;
+	}
+	if (sTitle.Find(L"단선") >= 0 && pInfo->nLine == 0) {
+		return 0;
+	}
+
+	if ("" != pInfo->szToken)//m_IDList[i])
+	{
+		if (!bJason) {
+			strHeader += "Content-Type:application/x-www-form-urlencoded;charset=UTF-8";
+		}
+		else {
+			strHeader += "Content-Type:application/json";
+		}
+		strHeader += "\r\n";
+		strHeader += "Authorization: Bearer ";
+		strHeader += "ya29.a0AfB_byAMuW88Hv9QwgJMy0ew90-Rl9TxonKj6o4pdVIj9MQGgDOUr7qouuA4WQh_oXjpEh2M8X1CxCu4Db0ZDMXqzQP_XaLzEsTKHZQHVXlC9DZDRqNbORuYAMuvAaIVGz9ct8c0lYj0G25Ne0GWaHu48eWiEqNuRcJZaCgYKAdUSARESFQHGX2Mib9qD7HGDapemmTsu8zmqAA0171";
+		strHeader += "\r\n\r\n";
+
+		HttpAddRequestHeaders(hReq, strHeader, strHeader.GetAllocLength(), HTTP_ADDREQ_FLAG_REPLACE | HTTP_ADDREQ_FLAG_ADD);
+
+		//
+		int nLen = WideCharToMultiByte(CP_UTF8, 0, /*m_IDList[i]*/pInfo->szToken, lstrlenW(pInfo->szToken), NULL, 0, NULL, NULL);
+		WideCharToMultiByte(CP_UTF8, 0, pInfo->szToken, lstrlenW(pInfo->szToken), strUtf8, nLen, NULL, NULL);
+
+		char* mID = qURLencode(strUtf8);
+
+		if (!bJason) {
+			sprintf_s(szSendData, 8000, "&priority=high&%s%s&registration_id=%s", "data=", pSendData, mID);
+		}
+		else {
+			/*sprintf_s(szSendData, 4000, "{\"registration_ids\":[\"%s\"], \"priority\": \"high\", \*/
+			sprintf_s(szSendData, 8000, "{ \
+											\"message\" : { \
+												\"token\" : \"%s\", \
+												\"notification\" : { \
+													\"title\" : \"%s\", \
+													\"body\" : \"%s\" \
+												}, \
+												\"data\" : { \
+													\"event\" : \"%s\" \
+												}, \
+												\"android\" : { \
+													\"priority\" : \"HIGH\", \
+													\"notification\" : { \
+														\"notification_priority\" : \"PRIORITY_MAX\" \
+													} \
+												}, \
+												\"apns\" : { \
+													\"headers\" : { \
+														\"apns-priority\" : \"10\" \
+													}, \
+													\"payload\" : { \
+														\"aps\" : { \
+															\"sound\" : \"default\" \
+														} \
+													} \
+												} \
+											} \
+										}"
+				, mID, szBody, szTitle, pSendData);
+		}
+		//
+
+		BOOL bSend = HttpSendRequest(hReq, NULL, 0, (LPVOID)szSendData, strlen(szSendData));
+		Log::Trace("%d 스레드 FCM Push Message 처리 완료! - 결과 : %d", userIndex, bSend);
+
+		delete mID;
+	}
+
+	::InternetCloseHandle(hReq);
+	::InternetCloseHandle(hHttp);
+	::InternetCloseHandle(hConnect);
+	//
+
+	//20230320 GBM start - test
+#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
+	QueryPerformanceCounter(&endTime);
+	double duringTime = CCommonFunc::GetPreciseTime(startTime, endTime);
+	Log::Trace("%d 스레드 FCM Push Message 처리 시간 : %f", userIndex, duringTime);
+#endif
+	//20230320 GBM end
+
+	//
+	delete[] szSendData;
+	delete[] strUtf8;
+	//
+
+	SetEvent(pDlg->m_hThread[userIndex]);
+
+	//SwitchToThread();
+	Sleep(1);
+
+	return 0;
+}
+//20231129 GBM end
+
 CEventSend::CEventSend()
 {
 	m_pThread = NULL;
@@ -588,10 +774,11 @@ void CEventSend::ProcessEventQueue(queue<BYTE*> & queue, DWORD & dwValue, bool b
 		Log::Trace("SendCount = %d", m_nSendCount);
 
 		//20230410 GBM start - 프로그램 기동 후 최초는 순차 전송 -> 20230420 GBM - 스레드간 토큰 값이 겹치는 현상을 버퍼 동적할당으로 해결 후 처음부터 병렬 전송으로 전송해도 OK ->
-		//20230814 GBM - 사용자에게 전송을 사용자 별이 아닌 한번에 처리하는 함수
+		//20230814 GBM - 사용자에게 전송을 사용자 별이 아닌 한번에 처리하는 함수 -> 
+		//20231129 GBM - OAuth2테스트를 위해 SendAlarmInParallel로 변경
 #if 1
-		SendAlarmAtOnce(pDataSave, nSize - 1);
-		//SendAlarmInParallel(pDataSave, nSize - 1);
+		//SendAlarmAtOnce(pDataSave, nSize - 1);
+		SendAlarmInParallel(pDataSave, nSize - 1);
 #else
 		SendAlarm(pDataSave, nSize - 1);
 #endif
@@ -1324,7 +1511,14 @@ void CEventSend::SendAlarmInParallel(BYTE* pData, int nSendCount)
 		ai[i].szTitle = szTitle;
  		ai[i].bJason = bJason;
 
+		//20231129 GBM start - OAuth2 적용 테스트 -> 원복 : 나머지 OAuth2 개발이 끝나면 다시 사용 예정
+#if 0
+		CWinThread* pThread = ::AfxBeginThread(SendAlarmWithOAuth2Thread, &ai[i]);
+#else
 		CWinThread* pThread = ::AfxBeginThread(SendAlarmThread, &ai[i]);
+#endif
+		//20231129 GBM end
+
 		Sleep(250);		// FCM에서 Push Message 처리 시간을 위해 순차적 Delay를 줘서 핸드폰 알람 수신 안정화
 
 	}
