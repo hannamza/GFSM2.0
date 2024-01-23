@@ -822,6 +822,12 @@ void CGFSM_SENDERDlg::OnBnClickedButtonEvent()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
+	//20240122 GBM start - test
+#ifdef _DEBUG
+	m_bAdminMode = TRUE;
+#endif
+	//20240122 GBM end
+
 	//20230420 GBM start - 메모리 누수 방지를 위해 링버퍼로 구성 변경
 #if 1
 	if (!m_bAdminMode)

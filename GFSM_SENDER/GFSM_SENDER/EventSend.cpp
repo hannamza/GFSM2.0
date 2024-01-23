@@ -168,7 +168,16 @@ UINT SendAlarmThread(LPVOID param)
 		strHeader += "AAAAfiAPpoM:APA91bEeX02UhoaqaGvTPffwhhp1y7VAY1PFDFiMfkANhYoEZqrSunBoaBGKoXKvnljDGrksIjUPniz7w2bCN7Lp9GABQovcTsbMbab_yYBXrvtb9DXBvIODfeopk4DLbsYJRgD9eDO4";
 		strHeader += "\r\n\r\n";
 
-		HttpAddRequestHeaders(hReq, strHeader, strHeader.GetAllocLength(), HTTP_ADDREQ_FLAG_REPLACE | HTTP_ADDREQ_FLAG_ADD);
+		BOOL bHeader = HttpAddRequestHeaders(hReq, strHeader, strHeader.GetAllocLength(), HTTP_ADDREQ_FLAG_REPLACE | HTTP_ADDREQ_FLAG_ADD);
+// 		if (!bHeader)
+// 		{
+// 			DWORD dw = GetLastError();
+// 			Log::Trace("Header GetlastError = %d", dw);
+// 			InternetCloseHandle(hConnect);
+// 			InternetCloseHandle(hHttp);
+// 			//SAFE_DELETE(pData);
+// 			return 0;
+// 		}
 
 		//
 		int nLen = WideCharToMultiByte(CP_UTF8, 0, /*m_IDList[i]*/pInfo->szToken, lstrlenW(pInfo->szToken), NULL, 0, NULL, NULL);
@@ -322,6 +331,9 @@ UINT SendAlarmWithOAuth2Thread(LPVOID param)
 
 	if ("" != pInfo->szToken)//m_IDList[i])
 	{
+		CString strAccessToken = _T("");
+		strAccessToken = CCommonFunc::CharToWCHAR(CCommonState::Instance()->m_szAccessToken);
+
 		if (!bJason) {
 			strHeader += "Content-Type:application/x-www-form-urlencoded;charset=UTF-8";
 		}
@@ -330,10 +342,19 @@ UINT SendAlarmWithOAuth2Thread(LPVOID param)
 		}
 		strHeader += "\r\n";
 		strHeader += "Authorization: Bearer ";
-		strHeader += "ya29.a0AfB_byAMuW88Hv9QwgJMy0ew90-Rl9TxonKj6o4pdVIj9MQGgDOUr7qouuA4WQh_oXjpEh2M8X1CxCu4Db0ZDMXqzQP_XaLzEsTKHZQHVXlC9DZDRqNbORuYAMuvAaIVGz9ct8c0lYj0G25Ne0GWaHu48eWiEqNuRcJZaCgYKAdUSARESFQHGX2Mib9qD7HGDapemmTsu8zmqAA0171";
+		strHeader += strAccessToken;
 		strHeader += "\r\n\r\n";
 
-		HttpAddRequestHeaders(hReq, strHeader, strHeader.GetAllocLength(), HTTP_ADDREQ_FLAG_REPLACE | HTTP_ADDREQ_FLAG_ADD);
+		BOOL bHeader = HttpAddRequestHeaders(hReq, strHeader, strHeader.GetAllocLength(), HTTP_ADDREQ_FLAG_REPLACE | HTTP_ADDREQ_FLAG_ADD);
+// 		if (!bHeader)
+// 		{
+// 			DWORD dw = GetLastError();
+// 			Log::Trace("Header GetlastError = %d", dw);
+// 			InternetCloseHandle(hConnect);
+// 			InternetCloseHandle(hHttp);
+// 			//SAFE_DELETE(pData);
+// 			return;
+// 		}
 
 		//
 		int nLen = WideCharToMultiByte(CP_UTF8, 0, /*m_IDList[i]*/pInfo->szToken, lstrlenW(pInfo->szToken), NULL, 0, NULL, NULL);
@@ -410,6 +431,285 @@ UINT SendAlarmWithOAuth2Thread(LPVOID param)
 	return 0;
 }
 //20231129 GBM end
+
+//20240122 GBM start - FCM에서 가산서버 Web Server쪽으로 이벤트 던짐
+BOOL SendRequestWebServer()
+{
+
+	HANDLE hConnect = InternetOpen(L"GoogleFirebase", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+	if (hConnect == NULL)
+	{
+		//SAFE_DELETE(pData);
+		return FALSE;
+	}
+
+	HANDLE hHttp = InternetConnect(hConnect, L"160.202.162.3", 8088, NULL, NULL, INTERNET_SERVICE_HTTP, 0, NULL);
+	if (hHttp == NULL)
+	{
+		InternetCloseHandle(hConnect);
+		hHttp = NULL;
+		//SAFE_DELETE(pData);
+		return FALSE;
+	}
+
+	HANDLE hReq = HttpOpenRequest(hHttp, L"GET", L"Firebase/v1/GetGoogleToken", L"HTTP/1.1", NULL, NULL,
+		INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP | INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS | INTERNET_FLAG_IGNORE_CERT_CN_INVALID | INTERNET_FLAG_IGNORE_CERT_DATE_INVALID, 0);
+	//INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_SECURE | INTERNET_FLAG_IGNORE_CERT_CN_INVALID | INTERNET_FLAG_IGNORE_CERT_DATE_INVALID, 0);
+	if (hReq == NULL)
+	{
+		InternetCloseHandle(hConnect);
+		InternetCloseHandle(hHttp);
+		//SAFE_DELETE(pData);
+		return FALSE;
+	}
+
+	CString strHeader = _T("");
+
+// 	strHeader += "Content-Type:application/json";
+// 	strHeader += "\r\n";
+// 	strHeader += "Authorization: Bearer ";
+// 	strHeader += "ya29.c.c0AY_VpZifWDPQi5PMShv7c-r6kHk1nUvki20CtMQ14djCnMSHC926xbO_fS4gtmuAtiB4JOaFWSPkRrAS4Bns0oEGyS1dx-Mv0VepfLhEEAdbRu2BIYuNUasl1yW-L8-BjyH2hxFIBHoVruiH6bDaNjV6KI2eRZyeTh5qfhr_goc5s6o3GZFrM8sb0y2FgBg4Kslp0EizQw7gVLrnCv675IH9Ilnw_6f6v7BbAKjeaqgQZtMYIs5PiWO8NLe5XHQxWWOKg9i3-6kQ6g0AVFUvL_wLyJyyi90koaZwT_bqhZRnPWlO2g2VGoWzVHF31W5oJsDeR6jdYgshh0o3cRQspyUC0W2Svobzwu94IB7OYFBit-urxnaWAzczqvY3T389DwdbWtdqIdSzbdtyWIwWI-46jr77nF5zmanUu90Wn0styYufuYfcRwf2bvScl_VdtMjXq8ud4JdU99BekhklcUWbkYemzV2bIM97Ot7I8YdIYrZ9JZ79sn1MwnnRxVVR0jVclZ9uzjr_B7Xisfb8vRcFpkW8MktoW1v6MWdI2j-hBJIV-RzjeRvck_z0-oQcj_zzlnMkz8sbnyFYF4gg79ppBaWfo_7MrQxO9s800yfYO1t_VcgWIx5blI2wOleo2Ie-6Bwq0na7tquU7S8fp9YiraRfa2WpfglcyWFinqkW2F3Of4Zibw5t09lrBOn0WY8pu-zzYBSWRSjjze5nl3exeusttXQg1S7VIVscYjZzbar4BOb0Yqck5XB2mqvZzWZ2okfoRu1Yi72p1FsIOucgmajc3lQdcuhiF9m9i7a8Oj5Q-bf0wjm70Ib58W7s7rmFRtRQcmbF8wIUdhYfjs1hY3UdJSoIbyf9hXyoc03qM0Vee225xJkhJkUxQcwlwqmlOxVI4Bs-i4IYF8g0cm0clSx2_e6l_vhhi-WwQhnlMJoBnVu5j_zqZRffQrmXtn34ZjQZ3R4Y630_zmIfiuQSz6b52JhesxYWQSweaeodnkQimbiOS_y";
+// 	strHeader += "\r\n\r\n";
+
+	BOOL bHeader = HttpAddRequestHeaders(hReq, strHeader, strHeader.GetAllocLength(), HTTP_ADDREQ_FLAG_REPLACE | HTTP_ADDREQ_FLAG_ADD);
+
+	BOOL bSend = HttpSendRequest(hReq, NULL, 0, (LPVOID)"", 0);
+
+	if (!bSend)
+	{
+		DWORD dw = GetLastError();
+		Log::Trace("AccessToken Refresh Request Failed, GetLastError() = %d", dw);
+	}
+	else
+	{
+		memset(CCommonState::Instance()->m_szAccessToken, 0, 2000);
+
+		DWORD bufSize;
+		DWORD dwSize;
+		char* buf = new char[4000];
+		memset(buf, NULL, sizeof(buf));
+		char* result = new char[4000];
+		memset(result, 0, 4000);
+		DWORD index = 0;
+		while (InternetReadFile(hReq, buf, 4000, &dwSize) && dwSize)
+		{
+			memcpy(result + index, buf, dwSize);
+			index += dwSize;
+			memset(buf, 0, 4000);
+		}
+			
+		memcpy(CCommonState::Instance()->m_szAccessToken, result, index);
+
+		delete[] buf;
+		delete[] result;
+	}
+
+	Log::Trace("AccessToken Refresh Request Completed!");
+
+	return TRUE;
+}
+
+UINT SendAlarmWebServerThread(LPVOID param)
+{
+	//20230320 GBM start - test
+#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
+	LARGE_INTEGER startTime, endTime;
+	QueryPerformanceCounter(&startTime);
+#endif
+	//20230320 GBM end
+
+	ALARM_INFO* pAi;
+	pAi = (ALARM_INFO*)param;
+	CEventSend* pDlg = pAi->pDlg;
+	int userIndex = pAi->userIndex;
+	char* pSendData = pAi->pSendData;
+	CString sTitle = pAi->sTitle;
+	char* szBody = pAi->szBody;
+	char* szTitle = pAi->szTitle;
+	BOOL bJason = pAi->bJason;
+
+	int nLen;
+	char* mID = NULL;
+
+	CTime   currTime;
+	CString strHeader;
+	CString strInputType;
+	CString sTemp;
+	LPVOID lpOutputBuffer = NULL;
+
+	DWORD dwLastTime = 0;
+
+	char* szSendData = new char[8000];
+	memset(szSendData, 0, 8000);
+	char* strUtf8 = new char[8000];
+	memset(strUtf8, 0, 8000);
+
+	currTime = CTime::GetCurrentTime();
+
+	//
+
+	HANDLE hConnect = InternetOpen(L"GoogleFirebase", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+	if (hConnect == NULL)
+	{
+		//SAFE_DELETE(pData);
+		return 0;
+	}
+
+	HANDLE hHttp = InternetConnect(hConnect, L"160.202.162.3", 8088, NULL, NULL, INTERNET_SERVICE_HTTP, 0, NULL);
+	if (hHttp == NULL)
+	{
+		InternetCloseHandle(hConnect);
+		hHttp = NULL;
+		//SAFE_DELETE(pData);
+		return 0;
+	}
+
+	HANDLE hReq = HttpOpenRequest(hHttp, L"POST", L"Firebase/v1/SendFirebaseMessage", L"HTTP/1.1", NULL, NULL,
+		INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP | INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS | INTERNET_FLAG_IGNORE_CERT_CN_INVALID | INTERNET_FLAG_IGNORE_CERT_DATE_INVALID, 0);
+		//INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_SECURE | INTERNET_FLAG_IGNORE_CERT_CN_INVALID | INTERNET_FLAG_IGNORE_CERT_DATE_INVALID, 0);
+	if (hReq == NULL)
+	{
+		InternetCloseHandle(hConnect);
+		InternetCloseHandle(hHttp);
+		//SAFE_DELETE(pData);
+		return 0;
+	}
+
+	//
+	userInfo* pInfo = pDlg->m_list.GetAt(pDlg->m_list.FindIndex(userIndex));
+	if (!pInfo) {
+		return 0;
+	}
+	if (pInfo->nUseTime) {
+		if (pInfo->nHour > currTime.GetHour() || pInfo->nEndHour < currTime.GetHour()
+			|| (pInfo->nHour == currTime.GetHour() && pInfo->nMin > currTime.GetMinute())
+			|| (pInfo->nEndHour == currTime.GetHour() && pInfo->nEndMin < currTime.GetMinute()))
+		{
+			return 0;
+		}
+	}
+	if (!pInfo->nAlert) {
+		return 0;
+	}
+	if (sTitle.Find(L"화재") >= 0 && pInfo->nFire == 0) {
+		return 0;
+	}
+	if (sTitle.Find(L"가스") >= 0 && pInfo->nGas == 0) {
+		return 0;
+	}
+	if (sTitle.Find(L"감시") >= 0 && pInfo->nSpy == 0) {
+		return 0;
+	}
+	if (sTitle.Find(L"단선") >= 0 && pInfo->nLine == 0) {
+		return 0;
+	}
+
+	if ("" != pInfo->szToken)//m_IDList[i])
+	{
+		//헤더 정보는 어차피 안쓰임, Web Server 쪽에서 만듦
+		if (!bJason) {
+			strHeader += "Content-Type:application/x-www-form-urlencoded;charset=UTF-8";
+		}
+		else {
+			strHeader += "Content-Type:application/json";
+		}
+		strHeader += "\r\n";
+		strHeader += "Authorization: Bearer ";
+		strHeader += "ya29.c.c0AY_VpZifWDPQi5PMShv7c-r6kHk1nUvki20CtMQ14djCnMSHC926xbO_fS4gtmuAtiB4JOaFWSPkRrAS4Bns0oEGyS1dx-Mv0VepfLhEEAdbRu2BIYuNUasl1yW-L8-BjyH2hxFIBHoVruiH6bDaNjV6KI2eRZyeTh5qfhr_goc5s6o3GZFrM8sb0y2FgBg4Kslp0EizQw7gVLrnCv675IH9Ilnw_6f6v7BbAKjeaqgQZtMYIs5PiWO8NLe5XHQxWWOKg9i3-6kQ6g0AVFUvL_wLyJyyi90koaZwT_bqhZRnPWlO2g2VGoWzVHF31W5oJsDeR6jdYgshh0o3cRQspyUC0W2Svobzwu94IB7OYFBit-urxnaWAzczqvY3T389DwdbWtdqIdSzbdtyWIwWI-46jr77nF5zmanUu90Wn0styYufuYfcRwf2bvScl_VdtMjXq8ud4JdU99BekhklcUWbkYemzV2bIM97Ot7I8YdIYrZ9JZ79sn1MwnnRxVVR0jVclZ9uzjr_B7Xisfb8vRcFpkW8MktoW1v6MWdI2j-hBJIV-RzjeRvck_z0-oQcj_zzlnMkz8sbnyFYF4gg79ppBaWfo_7MrQxO9s800yfYO1t_VcgWIx5blI2wOleo2Ie-6Bwq0na7tquU7S8fp9YiraRfa2WpfglcyWFinqkW2F3Of4Zibw5t09lrBOn0WY8pu-zzYBSWRSjjze5nl3exeusttXQg1S7VIVscYjZzbar4BOb0Yqck5XB2mqvZzWZ2okfoRu1Yi72p1FsIOucgmajc3lQdcuhiF9m9i7a8Oj5Q-bf0wjm70Ib58W7s7rmFRtRQcmbF8wIUdhYfjs1hY3UdJSoIbyf9hXyoc03qM0Vee225xJkhJkUxQcwlwqmlOxVI4Bs-i4IYF8g0cm0clSx2_e6l_vhhi-WwQhnlMJoBnVu5j_zqZRffQrmXtn34ZjQZ3R4Y630_zmIfiuQSz6b52JhesxYWQSweaeodnkQimbiOS_y";
+		strHeader += "\r\n\r\n";
+
+		BOOL bHeader = HttpAddRequestHeaders(hReq, strHeader, strHeader.GetAllocLength(), HTTP_ADDREQ_FLAG_REPLACE | HTTP_ADDREQ_FLAG_ADD);
+// 		if (!bHeader)
+// 		{
+// 			DWORD dw = GetLastError();
+// 			Log::Trace("Header GetLastError() = %d", dw);
+// 
+// 			InternetCloseHandle(hConnect);
+// 			InternetCloseHandle(hHttp);
+// 			return 0;
+// 		}
+
+		//
+		int nLen = WideCharToMultiByte(CP_UTF8, 0, /*m_IDList[i]*/pInfo->szToken, lstrlenW(pInfo->szToken), NULL, 0, NULL, NULL);
+		WideCharToMultiByte(CP_UTF8, 0, pInfo->szToken, lstrlenW(pInfo->szToken), strUtf8, nLen, NULL, NULL);
+
+		char* mID = qURLencode(strUtf8);
+
+		if (!bJason) {
+			sprintf_s(szSendData, 8000, "&priority=high&%s%s&registration_id=%s", "data=", pSendData, mID);
+		}
+		else {
+			/*sprintf_s(szSendData, 4000, "{\"registration_ids\":[\"%s\"], \"priority\": \"high\", \*/
+			sprintf_s(szSendData, 8000, "{ \
+											\"message\" : { \
+												\"token\" : \"%s\", \
+												\"notification\" : { \
+													\"title\" : \"%s\", \
+													\"body\" : \"%s\" \
+												}, \
+												\"data\" : { \
+													\"event\" : \"%s\" \
+												}, \
+												\"android\" : { \
+													\"priority\" : \"HIGH\", \
+													\"notification\" : { \
+														\"notification_priority\" : \"PRIORITY_MAX\" \
+													} \
+												}, \
+												\"apns\" : { \
+													\"headers\" : { \
+														\"apnspriority\" : \"10\" \
+													}, \
+													\"payload\" : { \
+														\"aps\" : { \
+															\"sound\" : \"default\" \
+														} \
+													} \
+												} \
+											} \
+										}"
+				, mID, szBody, szTitle, pSendData);
+		}
+		//
+
+		BOOL bSend = HttpSendRequest(hReq, NULL, 0, (LPVOID)szSendData, strlen(szSendData));
+		Log::Trace("%d 스레드 FCM Push Message 처리 완료! - 결과 : %d", userIndex, bSend);
+
+		if (!bSend)
+		{
+			DWORD dw = GetLastError();
+			Log::Trace("GetLastError() = %d", dw);
+		}
+
+		delete mID;
+	}
+
+	::InternetCloseHandle(hReq);
+	::InternetCloseHandle(hHttp);
+	::InternetCloseHandle(hConnect);
+	//
+
+	//20230320 GBM start - test
+#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
+	QueryPerformanceCounter(&endTime);
+	double duringTime = CCommonFunc::GetPreciseTime(startTime, endTime);
+	Log::Trace("%d 스레드 FCM Push Message 처리 시간 : %f", userIndex, duringTime);
+#endif
+	//20230320 GBM end
+
+	//
+	delete[] szSendData;
+	delete[] strUtf8;
+	//
+
+	SetEvent(pDlg->m_hThread[userIndex]);
+
+	//SwitchToThread();
+	Sleep(1);
+
+	return 0;
+}
+//20240122 GBM end
 
 CEventSend::CEventSend()
 {
@@ -1511,13 +1811,16 @@ void CEventSend::SendAlarmInParallel(BYTE* pData, int nSendCount)
 		ai[i].szTitle = szTitle;
  		ai[i].bJason = bJason;
 
-		//20231129 GBM start - OAuth2 적용 테스트 -> 원복 : 나머지 OAuth2 개발이 끝나면 다시 사용 예정
-#if 0
-		CWinThread* pThread = ::AfxBeginThread(SendAlarmWithOAuth2Thread, &ai[i]);
+		//20240122 GBM start - OAuth2 적용 테스트 -> 원복 : 나머지 OAuth2 개발이 끝나면 다시 사용 예정 -> Web Server 경유 방식으로 변경 -> Web Server 경유하되 AccessToken만 이용하고 나머지 전송루틴은 OAuth2로 사용
+#if 1	
+		BOOL bSendAccssTokenRefresh = SendRequestWebServer();
+		if(bSendAccssTokenRefresh)
+			//CWinThread* pThread = ::AfxBeginThread(SendAlarmWebServerThread, &ai[i]);
+			CWinThread* pThread = ::AfxBeginThread(SendAlarmWithOAuth2Thread, &ai[i]);
 #else
 		CWinThread* pThread = ::AfxBeginThread(SendAlarmThread, &ai[i]);
 #endif
-		//20231129 GBM end
+		//20240122 GBM end
 
 		Sleep(250);		// FCM에서 Push Message 처리 시간을 위해 순차적 Delay를 줘서 핸드폰 알람 수신 안정화
 
@@ -1747,6 +2050,8 @@ void CEventSend::SendAlarmAtOnce(BYTE* pData, int nSendCount)
 	strHeader += "\r\n\r\n";
 
 	HttpAddRequestHeaders(hReq, strHeader, strHeader.GetAllocLength(), HTTP_ADDREQ_FLAG_REPLACE | HTTP_ADDREQ_FLAG_ADD);
+
+	BOOL bHeader = HttpAddRequestHeaders(hReq, strHeader, strHeader.GetAllocLength(), HTTP_ADDREQ_FLAG_REPLACE | HTTP_ADDREQ_FLAG_ADD);
 	//
 
 	if (!bJason) {

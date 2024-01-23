@@ -14,5 +14,6 @@ public:
 	char m_szID[32];
 	DWORD m_dwToken;
 	DWORD m_dwLastRecv;
+	char m_szAccessToken[2000];	//Access Token
 };
 

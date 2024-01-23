@@ -83,5 +83,6 @@ private:
 public:
 	void SendThreadLoop();	
 	volatile long m_nSendCount;
+
 };
 
