@@ -258,9 +258,7 @@ UINT SendAlarmWithOAuth2Thread(LPVOID param)
 	char* mID = NULL;
 
 	CTime   currTime;
-	CString strHeader;
-	CString strInputType;
-	CString sTemp;
+	CString strHeader = _T("");
 	LPVOID lpOutputBuffer = NULL;
 
 	DWORD dwLastTime = 0;
@@ -398,7 +396,7 @@ UINT SendAlarmWithOAuth2Thread(LPVOID param)
 				, mID, szBody, szTitle, pSendData);
 		}
 		//
-
+		
 		BOOL bSend = HttpSendRequest(hReq, NULL, 0, (LPVOID)szSendData, strlen(szSendData));
 		Log::Trace("%d 스레드 FCM Push Message 처리 완료! - 결과 : %d", userIndex, bSend);
 
@@ -499,6 +497,8 @@ BOOL SendRequestWebServer()
 		}
 			
 		memcpy(CCommonState::Instance()->m_szAccessToken, result, index);
+
+		Log::Trace("Access Token : %s", CCommonState::Instance()->m_szAccessToken);
 
 		delete[] buf;
 		delete[] result;
