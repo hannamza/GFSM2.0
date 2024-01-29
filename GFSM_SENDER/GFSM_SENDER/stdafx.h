@@ -142,6 +142,10 @@ static const TCHAR g_lpszOccurInfo[] = {
 //사용자(수신기 이벤트를 받을 인원) 최대 개수
 #define USER_MAX_COUNT	20
 
+#define PROGRAM_NAME	"GFSM 이벤트 관리자"
+
+#define PROGRAM_VERSION	2.3
+
 //20230207 GBM end
 
 #ifndef _AFX_NO_OLE_SUPPORT
