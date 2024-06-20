@@ -477,6 +477,7 @@ BOOL SendRequestWebServer()
 	{
 		DWORD dw = GetLastError();
 		Log::Trace("AccessToken Refresh Request Failed, GetLastError() = %d", dw);
+		return FALSE;
 	}
 	else
 	{
