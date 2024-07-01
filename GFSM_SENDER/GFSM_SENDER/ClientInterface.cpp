@@ -179,3 +179,13 @@ void CClientInterface::ProcessRequestAddEvent(int idx, CHAR* szID, CHAR* szEvent
 
 	Send((BYTE*)&event, sizeof(ProtocolRequestAddEvent));
 }
+
+void CClientInterface::ProcessRequestGetFacpType(int nManagerSeq)
+{
+	ProtocolRequestGetFacpType facpType;
+	facpType.nManagerSeq = nManagerSeq;
+
+	Log::Trace("수신기 타입 정보 요청 (ManagerSeq : %d)", nManagerSeq);
+
+	Send((BYTE*)&facpType, sizeof(ProtocolRequestGetFacpType));
+}

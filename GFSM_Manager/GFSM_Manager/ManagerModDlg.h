@@ -18,12 +18,12 @@ public:
 #endif
 
 public:
-	void SetManagerValue(CString sID, CString sPW, CString sEtc, int nLimit);
-	void GetManagerValue(CString & sID, CString & sPW, CString & sEtc, int & nLimit);
+	void SetManagerValue(CString sID, CString sPW, CString sEtc, int nLimit, int nFacpType);
+	void GetManagerValue(CString & sID, CString & sPW, CString & sEtc, int & nLimit, int & nFacpType);
 
 public:
 	CString m_sID, m_sPW, m_sEtc;
-	int m_nLimit;
+	int m_nLimit, m_nFacpType;
 	CBrush m_brush;
 
 protected:
@@ -46,4 +46,5 @@ public:
 	CEdit m_editWorksite;
 	CEdit m_editLoc;
 	CButton m_checkPw;
+	CComboBox m_ctrlCBFacpType;
 };

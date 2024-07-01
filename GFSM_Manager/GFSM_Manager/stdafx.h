@@ -44,6 +44,19 @@ using namespace Gdiplus; //네임스페이스 설정
 extern HANDLE G_hShutdown_Event;
 extern CGlobal Global;
 
+#define PROGRAM_NAME	"GFSM 관리자 프로그램"
+
+#define PROGRAM_VERSION	3.0
+
+//20240627 GBM start - 관리자에 따른 수신기 타입 추가
+enum {
+	MANAGER_FACP_TYPE_F3,
+	MANAGER_FACP_TYPE_GT1
+};
+//20240627 GBM end
+
+//#define		LOCAL_TEST_MODE		//20240627 GBM - 실제 적용 전 로컬 PC에서 사용하기 위해 해당 정의로 IP 변경되도록 함
+
 #include <string>
 using namespace std;
 
@@ -52,7 +65,6 @@ using namespace std;
 
 #define		SOCKET_RECV		(WM_USER+9001)
 #define		REDISPLAY_MSG	(WM_USER+9002)
-
 
 #ifndef _AFX_NO_OLE_SUPPORT
 #include <afxdtctl.h>           // Internet Explorer 4 공용 컨트롤에 대한 MFC 지원입니다.

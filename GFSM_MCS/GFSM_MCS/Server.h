@@ -77,6 +77,9 @@ protected:
 	static void ProcessProtocolRequestSetToken1(BYTE* pData, Packet* packet);
 	static void ProcessProtocolRequestGetEventListEnc(BYTE* pData, Packet* packet);
 
+	// 수신기 타입
+	static void ProcessProtocolRequestGetFacpType(BYTE* pData, Packet* packet);
+
 private:
 	Server& operator=(Server& rhs);
 	Server(const Server& rhs);

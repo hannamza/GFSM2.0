@@ -85,6 +85,15 @@ public:
 		RequestManagerInfo,		// 관리자 로그인 및 관리자 정보
 		ResponseManagerInfo,
 
+		RequestPhoneToken,		// 40. 토큰/전화번호 암호화
+		ResponsePhoneToken,
+
+		RequestGetEventListEnc,	// 42. 이벤트 목록 요청 암호화
+		ResponseGetEventListEnc,
+
+		RequestGetFacpType,		// 44. 수신기 타입 정보 : 20240628 GBM 
+		ResponseGetFacpType,
+
 		DefineEndProtocol
 	};
 };
@@ -459,5 +468,32 @@ public:
 	int nManagerSeq;
 	int nLimitUser;
 };
+
+//20240628 GBM start
+// 수신기 타입 정보 요청
+class ProtocolRequestGetFacpType : public ProtocolHeader
+{
+public:
+	ProtocolRequestGetFacpType()
+	{
+		memset(this, 0, sizeof(*this));
+		protocol = RequestGetFacpType;
+		size = sizeof(*this);
+	}
+	int nManagerSeq;
+};
+
+class ProtocolResponseGetFacpType : public ProtocolHeader
+{
+public:
+	ProtocolResponseGetFacpType()
+	{
+		memset(this, 0, sizeof(*this));
+		protocol = ResponseGetFacpType;
+		size = sizeof(*this);
+	}
+	int nFacpType;
+};
+//20240628 GBM end
 
 #pragma pack(pop, 1)

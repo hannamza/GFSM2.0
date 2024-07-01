@@ -592,6 +592,20 @@ void CGFSM_SENDERDlg::OnBnClickedButtonStart()
 		return;
 	}
 
+	//20240628 GBM start - 수신기 타입 정보, 이 시점에서는 정상적인 상태라면 CCommonState정보가 채워진 상태
+	int nManagerSeq = 0;
+	CHAR* pManagerID = nullptr;
+
+	nManagerSeq = CCommonState::Instance()->m_nIdx;
+	if (nManagerSeq <= 0)
+	{
+		Log::Trace("Manager Seq 정보가 없습니다.");
+		return;
+	}
+	
+	CClientInterface::Instance()->ProcessRequestGetFacpType(nManagerSeq);
+	//20240628 GBM end
+
 	Log::Trace("Sender start...");
 
 	CDeviceInfo::New();

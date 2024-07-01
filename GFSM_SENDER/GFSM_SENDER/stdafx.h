@@ -13,6 +13,13 @@
 
 #define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS      // 일부 CString 생성자는 명시적으로 선언됩니다.
 
+//20240627 GBM start - 관리자에 따른 수신기 타입 추가
+enum {
+	MANAGER_FACP_TYPE_F3,
+	MANAGER_FACP_TYPE_GT1
+};
+//20240627 GBM end
+
 // MFC의 공통 부분과 무시 가능한 경고 메시지에 대한 숨기기를 해제합니다.
 #define _AFX_ALL_WARNINGS
 
@@ -144,7 +151,7 @@ static const TCHAR g_lpszOccurInfo[] = {
 
 #define PROGRAM_NAME	"GFSM 이벤트 관리자"
 
-#define PROGRAM_VERSION	2.3
+#define PROGRAM_VERSION	3.0
 
 //20230207 GBM end
 

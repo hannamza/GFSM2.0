@@ -93,6 +93,9 @@ public:
 		RequestGetEventListEnc,	// 42. 이벤트 목록 요청 암호화
 		ResponseGetEventListEnc, 
 
+		RequestGetFacpType,		// 44. 수신기 타입 정보 : 20240628 GBM 
+		ResponseGetFacpType,
+
 		DefineEndProtocol
 	};
 };
@@ -284,6 +287,7 @@ public:
 		char szID[32];
 		char szEtc[256];
 		char szRegdate[32];
+		int nFacpType;	//20240627 GBM - 수신기 타입 0:F3, 1:GT1
 	};
 	int nCount;
 	managerInfo info[0];
@@ -304,6 +308,7 @@ public:
 	char szID[32];
 	char szPW[32];
 	char szEtc[256];
+	int nFacpType;	//20240627 GBM - 수신기 타입 0:F3, 1:GT1
 };
 
 //--------------------------------------------------------------------------------------
@@ -322,6 +327,7 @@ public:
 	char szID[32];
 	char szPW[32];
 	char szEtc[256];
+	int nFacpType;	//20240627 GBM - 수신기 타입 0:F3, 1:GT1
 };
 
 //--------------------------------------------------------------------------------------
@@ -502,5 +508,32 @@ public:
 	int nEndMin;
 	int nUseTime;*/
 };
+
+//20240628 GBM start
+// 수신기 타입 정보 요청
+class ProtocolRequestGetFacpType : public ProtocolHeader
+{
+public:
+	ProtocolRequestGetFacpType()
+	{
+		memset(this, 0, sizeof(*this));
+		protocol = RequestGetFacpType;
+		size = sizeof(*this);
+	}
+	int nManagerSeq;
+};
+
+class ProtocolResponseGetFacpType : public ProtocolHeader
+{
+public:
+	ProtocolResponseGetFacpType()
+	{
+		memset(this, 0, sizeof(*this));
+		protocol = ResponseGetFacpType;
+		size = sizeof(*this);
+	}
+	int nFacpType;
+};
+//20240628 GBM end
 
 #pragma pack(pop, 1)

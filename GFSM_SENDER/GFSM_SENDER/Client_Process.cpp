@@ -47,6 +47,11 @@ void Client::WorkerProcessRecvPacket(BYTE* pPacket, int nSize)
 		CCommonState::Instance()->m_dwLastRecv = GetTickCount();
 		TRACE("ProtocolHeader::ResponseGetUserTokenList\n");
 		break;
+	case ProtocolHeader::ResponseGetFacpType:						// 수신기 타입 - 20240628 GBM 
+		ProcessResponseGetFacpType(pData);
+		CCommonState::Instance()->m_dwLastRecv = GetTickCount();
+		TRACE("ProtocolHeader::ProcessResponseGetFacpType\n");
+		break;
 	default:
 		break;
 	}
@@ -119,4 +124,29 @@ void Client::ProcessResponseAddEvent(BYTE* pData)
 	{
 		Log::Trace("이벤트 저장 실패");
 	}
+}
+
+void Client::ProcessResponseGetFacpType(BYTE* pData)
+{
+	ProtocolResponseGetFacpType* pRes = (ProtocolResponseGetFacpType*)pData;
+
+	int nFacpType = pRes->nFacpType;
+	if (nFacpType >= MANAGER_FACP_TYPE_F3 && nFacpType <= MANAGER_FACP_TYPE_GT1)
+	{
+		CCommonState::Instance()->m_nFacpType = nFacpType;
+		if (nFacpType == MANAGER_FACP_TYPE_F3)
+		{
+			Log::Trace("수신기 타입 F3 - 이벤트 이력과 알람 모두 전송합니다.");
+		}
+		else if (nFacpType == MANAGER_FACP_TYPE_GT1)
+		{
+			Log::Trace("수신기 타입 GT1 - 이벤트 이력은 전송하지만 알람은 전송하지 않습니다.");
+		}
+	}
+	else
+	{
+		CCommonState::Instance()->m_nFacpType = 0;
+		Log::Trace("FacpType Out Of Range : %d", nFacpType);
+	}
+	
 }

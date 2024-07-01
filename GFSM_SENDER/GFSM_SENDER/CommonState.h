@@ -15,5 +15,6 @@ public:
 	DWORD m_dwToken;
 	DWORD m_dwLastRecv;
 	char m_szAccessToken[2000];	//Access Token
+	int m_nFacpType;
 };
 

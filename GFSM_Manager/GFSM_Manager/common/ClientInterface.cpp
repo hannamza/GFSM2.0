@@ -203,7 +203,7 @@ void CClientInterface::ProcessRequestDelSystem(int nSeq)
 	Send((BYTE*)&system, sizeof(ProtocolRequestDelSystem));
 }
 
-void CClientInterface::ProcessRequestAddManager(int nWorksiteSeq, int nUserLimit, CString sID, CString sPW, CString sEtc)
+void CClientInterface::ProcessRequestAddManager(int nWorksiteSeq, int nUserLimit, CString sID, CString sPW, CString sEtc, int nFacpType)
 {
 	ProtocolRequestAddManager manager;
 	manager.nWorksiteSeq = nWorksiteSeq;
@@ -211,13 +211,14 @@ void CClientInterface::ProcessRequestAddManager(int nWorksiteSeq, int nUserLimit
 	strcpy_s(manager.szID, CCommonFunc::WcharToUtf8(sID.GetBuffer(0)));
 	strcpy_s(manager.szPW, CCommonFunc::WcharToUtf8(sPW.GetBuffer(0)));
 	strcpy_s(manager.szEtc, CCommonFunc::WcharToUtf8(sEtc.GetBuffer(0)));
+	manager.nFacpType = nFacpType;	//20240627 GBM - 수신기 타입 추가
 
-	Log::Trace("매니저 추가 요청(%d, %d, %s, %s)", manager.nWorksiteSeq, manager.nUserLimit, manager.szID, manager.szEtc);
+	Log::Trace("매니저 추가 요청(%d, %d, %s, %s, %d)", manager.nWorksiteSeq, manager.nUserLimit, manager.szID, manager.szEtc, manager.nFacpType);
 
 	Send((BYTE*)&manager, sizeof(ProtocolRequestAddManager));
 }
 
-void CClientInterface::ProcessRequestModManager(int nSeq, int nUserLimit, CString sID, CString sPW, CString sEtc)
+void CClientInterface::ProcessRequestModManager(int nSeq, int nUserLimit, CString sID, CString sPW, CString sEtc, int nFacpType)
 {
 	ProtocolRequestModManager manager;
 	manager.nSeq = nSeq;
@@ -225,8 +226,9 @@ void CClientInterface::ProcessRequestModManager(int nSeq, int nUserLimit, CStrin
 	strcpy_s(manager.szID, CCommonFunc::WcharToUtf8(sID.GetBuffer(0)));
 	strcpy_s(manager.szPW, CCommonFunc::WcharToUtf8(sPW.GetBuffer(0)));
 	strcpy_s(manager.szEtc, CCommonFunc::WcharToUtf8(sEtc.GetBuffer(0)));
+	manager.nFacpType = nFacpType;	//20240627 GBM - 수신기 타입 추가
 
-	Log::Trace("매니저 수정 요청(%d, %d, %s, %s)", manager.nSeq, manager.nUserLimit, manager.szID, manager.szEtc);
+	Log::Trace("매니저 수정 요청(%d, %d, %s, %s, %d)", manager.nSeq, manager.nUserLimit, manager.szID, manager.szEtc, manager.nFacpType);
 
 	Send((BYTE*)&manager, sizeof(ProtocolRequestModManager));
 }

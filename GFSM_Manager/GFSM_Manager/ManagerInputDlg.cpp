@@ -27,6 +27,7 @@ void CManagerInputDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_CANCEL, m_btnCancel);
 	DDX_Control(pDX, IDC_BUTTON_CONFIRM, m_btnOk);
 	DDX_Control(pDX, IDC_EDIT_ETC, m_editEtc);
+	DDX_Control(pDX, IDC_CB_FACP_TYPE, m_ctrlCBFacpType);
 }
 
 
@@ -65,16 +66,30 @@ BOOL CManagerInputDlg::OnInitDialog()
 
 	CRect rect, rt;
 	GetDlgItem(IDC_EDIT_ETC)->GetClientRect(&rt);
-	GetDlgItem(IDC_EDIT_ETC)->GetClientRect(&rt);
 	GetDlgItem(IDC_EDIT_ETC)->ClientToScreen(&rt);
 	ScreenToClient(&rt);
 
+	//20240627 GBM start - 수신기 타입 추가
+#if 1
+	::SetWindowPos(m_hWnd, HWND_TOP, 0, 0, rt.right + 60, rt.bottom + 56 + 70 + 30, SWP_NOMOVE);
+
+	GetClientRect(&rect);
+
+	m_ctrlCBFacpType.AddString(_T("F3"));
+	m_ctrlCBFacpType.AddString(_T("GT1"));
+	m_ctrlCBFacpType.SetCurSel(0);
+
+	m_btnOk.MoveWindow(rect.Width() / 2 - 120 - 10, rt.bottom + 15 + 30, 120, 36);
+	m_btnCancel.MoveWindow(rect.Width() / 2 + 10, rt.bottom + 15 + 30, 120, 36);
+#else
 	::SetWindowPos(m_hWnd, HWND_TOP, 0, 0, rt.right + 60, rt.bottom + 56 + 70, SWP_NOMOVE);
 
 	GetClientRect(&rect);
 
 	m_btnOk.MoveWindow(rect.Width() / 2 - 120 - 10, rt.bottom + 15, 120, 36);
 	m_btnCancel.MoveWindow(rect.Width() / 2 + 10, rt.bottom + 15, 120, 36);
+#endif
+	//20240627 GBM end
 
 	m_editEtc.SetLimitText(400);
 
@@ -165,16 +180,18 @@ void CManagerInputDlg::OnBnClickedButtonConfirm()
 	CString sTemp;
 	GetDlgItemText(IDC_EDIT_LIMIT, sTemp);
 	m_nLimit = _ttoi(sTemp.GetBuffer(0));
+	m_nFacpType = m_ctrlCBFacpType.GetCurSel();
 
 	OnOK();
 }
 
-void CManagerInputDlg::GetInputValue(CString & sID, CString & sPW, CString & sEtc, int & nLimit)
+void CManagerInputDlg::GetInputValue(CString & sID, CString & sPW, CString & sEtc, int & nLimit, int & nFacpType)
 {
 	sID = m_sID;
 	sPW = m_sPW;
 	sEtc = m_sEtc;
 	nLimit = m_nLimit;
+	nFacpType = m_nFacpType;
 }
 
 void CManagerInputDlg::OnBnClickedButtonCancel()

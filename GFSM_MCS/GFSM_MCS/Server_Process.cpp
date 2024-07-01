@@ -108,6 +108,9 @@ void CALLBACK Server::WorkerProcessRecvPacket(PTP_CALLBACK_INSTANCE /* Instance 
 	case ProtocolHeader::RequestGetEventListEnc:
 		ProcessProtocolRequestGetEventListEnc(pData, packet);
 		break;
+	case ProtocolHeader::RequestGetFacpType:		// 수신기 타입 정보 - 20240628 GBM
+		ProcessProtocolRequestGetFacpType(pData, packet);
+		break;
 	default:
 		Server::Instance()->Echo(packet);
 		break;
@@ -698,8 +701,17 @@ void Server::ProcessProtocolRequestGetManagerList(BYTE* pData, Packet* packet)
 	MYSQL_ROW  ContentRow;
 
 	CDBConnectionManager* pManager = CDBPool::Instance()->GetDbManager(); if (!pManager) return;
-	sprintf_s(szQuery, 2048, "SELECT seq, worksite_seq, user_limit, id, etc, regdate FROM manager_account WHERE worksite_seq=%d AND isuse='1'"
+
+	//20240627 GBM start - 수신기 타입 추가
+#if 1
+	sprintf_s(szQuery, 2048, "SELECT seq, worksite_seq, user_limit, id, etc, regdate, facp_type FROM manager_account WHERE worksite_seq=%d AND isuse='1'"
 	, pReq->nValue);
+#else
+	sprintf_s(szQuery, 2048, "SELECT seq, worksite_seq, user_limit, id, etc, regdate FROM manager_account WHERE worksite_seq=%d AND isuse='1'"
+		, pReq->nValue);
+#endif
+	//20240627 GBM end
+
 	pRes = pManager->MysqlSelectQuery(szQuery);
 
 	int nSize = sizeof(ProtocolResponseGetManagerList);
@@ -722,6 +734,19 @@ void Server::ProcessProtocolRequestGetManagerList(BYTE* pData, Packet* packet)
 			strcat(pResult->info[nIndex].szID, (char*)ContentRow[3]);
 			strcat(pResult->info[nIndex].szEtc, (char*)ContentRow[4]);
 			strcat(pResult->info[nIndex].szRegdate, (char*)ContentRow[5]);
+
+			//20240627 GBM start - 수신기 타입 0:F3, 1:GT1
+			char* pFacpType = NULL;
+			pFacpType = (char*)ContentRow[6];
+			if (pFacpType != NULL)
+			{
+				pResult->info[nIndex].nFacpType = atoi(ContentRow[6]);			
+			}
+			else
+			{
+				pResult->info[nIndex].nFacpType = 0;
+			}
+			//20240627 GBM end
 
 			nIndex++;
 		}
@@ -780,8 +805,15 @@ void Server::ProcessProtocolRequestAddManager(BYTE* pData, Packet* packet)
 		pManager->ReleaseSelectQuery(pRes);
 	}
 
+	//20240627 GBM start - 수신기 타입 정보 추가
+#if 1
+	sprintf_s(szQuery, 2048, "INSERT INTO manager_account(worksite_seq, user_limit, id, pw, etc, facp_type) VALUES(%d, %d, '%s', PASSWORD('%s'), '%s', %d)"
+		, pReq->nWorksiteSeq, pReq->nUserLimit, pReq->szID, pReq->szPW, pReq->szEtc, pReq->nFacpType);
+#else
 	sprintf_s(szQuery, 2048, "INSERT INTO manager_account(worksite_seq, user_limit, id, pw, etc) VALUES(%d, %d, '%s', PASSWORD('%s'), '%s')"
 		, pReq->nWorksiteSeq, pReq->nUserLimit, pReq->szID, pReq->szPW, pReq->szEtc);
+#endif
+	//20240627 GBM end
 	if (pManager->MysqlExcuteQuery(szQuery))
 	{
 		res.nResult = 0; // success
@@ -825,14 +857,27 @@ void Server::ProcessProtocolRequestModManager(BYTE* pData, Packet* packet)
 		pManager->ReleaseSelectQuery(pRes);
 	}
 
+	//20240627 GBM start - 수신기 타입 추가
+#if 1
+	if (strlen(pReq->szPW) > 0) {
+		sprintf_s(szQuery, 2048, "UPDATE manager_account SET pw=PASSWORD('%s'), user_limit=%d, etc='%s', facp_type=%d WHERE seq=%d"
+			, pReq->szPW, pReq->nUserLimit, pReq->szEtc, pReq->nFacpType, pReq->nSeq);
+	}
+	else {
+		sprintf_s(szQuery, 2048, "UPDATE manager_account SET user_limit=%d, etc='%s', facp_type=%d WHERE seq=%d"
+			, pReq->nUserLimit, pReq->szEtc, pReq->nFacpType, pReq->nSeq);
+	}
+#else
 	if (strlen(pReq->szPW) > 0) {
 		sprintf_s(szQuery, 2048, "UPDATE manager_account SET pw=PASSWORD('%s'), user_limit=%d, etc='%s' WHERE seq=%d"
 			, pReq->szPW, pReq->nUserLimit, pReq->szEtc, pReq->nSeq);
-	}
+}
 	else {
 		sprintf_s(szQuery, 2048, "UPDATE manager_account SET user_limit=%d, etc='%s' WHERE seq=%d"
 			, pReq->nUserLimit, pReq->szEtc, pReq->nSeq);
 	}
+#endif
+	//20240627 GBM end
 
 	if (pManager->MysqlExcuteQuery(szQuery))
 	{
@@ -1353,4 +1398,47 @@ void Server::ProcessProtocolRequestGetEventListEnc(BYTE* pData, Packet* packet)
 	Server::Instance()->Send(packet, (BYTE*)pEventList, sizeof(ProtocolResponseGetEventList) + nPoint);
 
 	SAFE_DELETE(pEventList);
+}
+
+void Server::ProcessProtocolRequestGetFacpType(BYTE* pData, Packet* packet)
+{
+	ProtocolRequestGetFacpType* pReq = (ProtocolRequestGetFacpType*)pData;
+	ProtocolResponseGetFacpType res;
+
+	CDBConnectionManager* pManager = CDBPool::Instance()->GetDbManager(); if (!pManager) return;
+
+	MYSQL_RES* pRes = NULL;
+	CHAR szQuery[2048];
+	MYSQL_ROW  ContentRow;
+
+	sprintf_s(szQuery, 2048, "SELECT facp_type FROM manager_account WHERE seq=%d", pReq->nManagerSeq);
+	pRes = pManager->MysqlSelectQuery(szQuery);
+
+	if (pRes)
+	{
+		int nRowCount = 0;
+		nRowCount = mysql_num_rows(pRes);
+		if (nRowCount > 0)
+		{
+			ContentRow = mysql_fetch_row(pRes);
+			char* pFacpType = nullptr;
+			pFacpType = (char*)ContentRow[0];
+
+			if (pFacpType == NULL)
+			{
+				res.nFacpType = 0;
+			}
+			else
+			{
+				res.nFacpType = atoi(ContentRow[0]);
+			}
+		}
+		else
+		{
+			trace0("ProcessProtocolRequestGetFacpType - manager_seq : %d rowcount = 0", pReq->nManagerSeq);
+			res.nFacpType = 0;
+		}
+	}
+
+	Server::Instance()->Send(packet, (BYTE*)&res, sizeof(ProtocolResponseGetFacpType));
 }

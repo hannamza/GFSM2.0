@@ -23,6 +23,7 @@ public:
 	void ProcessCommonRequest(USHORT protocol, int nValue);
 	void ProcessRequestLogin(WCHAR* szID, WCHAR* szPW);
 	void ProcessRequestAddEvent(int idx, CHAR* szID, CHAR* szEvent, int nCount);
+	void ProcessRequestGetFacpType(int nManagerSeq);
 	bool IsConnected();
 
 private:

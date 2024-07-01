@@ -16,6 +16,8 @@
 // MFC의 공통 부분과 무시 가능한 경고 메시지에 대한 숨기기를 해제합니다.
 #define _AFX_ALL_WARNINGS
 
+//#define	LOCAL_TEST_MODE		//20240627 GBM - 실제 적용 전 로컬 PC에서 사용하기 위해 해당 정의로 IP 변경되도록 함
+
 #include <afxwin.h>         // MFC 핵심 및 표준 구성 요소입니다.
 #include <afxext.h>         // MFC 확장입니다.
 

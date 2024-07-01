@@ -68,8 +68,15 @@ END_MESSAGE_MAP()
 
 // CMainTopDlg 메시지 처리기입니다.
 
+//20240627 GBM start - 수신기 타입 추가
+#if 1
+const TCHAR* lpszHeaderManager[] = { _T("No"), _T("아이디"), _T("사용자 제한"), _T("비고"), _T("수신기 타입"), NULL };
+const int colWidthListManager[] = { 15, 50, 50, 80, 50, 0 };
+#else
 const TCHAR* lpszHeaderManager[] = { _T("No"), _T("아이디"), _T("사용자 제한"), _T("비고"), NULL };
 const int colWidthListManager[] = { 15, 50, 50, 80, 0 };
+#endif
+//20240627 GBM end
 
 BOOL CMainTopDlg::OnInitDialog()
 {
@@ -206,6 +213,16 @@ void CMainTopDlg::ReListup()
 			m_listManager.SetItemText(nIndex, 2, sTemp, RGB(80, 80, 80), RGB(255, 255, 255));
 			m_listManager.SetItemText(nIndex, 3, CCommonFunc::Utf8ToWCHAR(pInfo->szEtc), RGB(80, 80, 80), RGB(255, 255, 255));
 			m_listManager.SetItemData(nIndex, (DWORD)pInfo);
+
+			//20240627 GBM start - 수신기 타입 추가
+			CString strFacpType = _T("");
+			if (pInfo->nFacpType == MANAGER_FACP_TYPE_F3)
+				strFacpType = _T("F3");
+			else if (pInfo->nFacpType == MANAGER_FACP_TYPE_GT1)
+				strFacpType = _T("GT1");
+
+			m_listManager.SetItemText(nIndex, 4, strFacpType, RGB(80, 80, 80), RGB(255, 255, 255));
+			//20240627 GBM end
 		}
 	}
 }
@@ -270,8 +287,8 @@ void CMainTopDlg::OnBnClickedButtonAdd()
 		return;
 	}
 	CString sID, sPW, sEtc;
-	int  nLimit;
-	dlg.GetInputValue(sID, sPW, sEtc, nLimit);
+	int  nLimit, nFacpType;
+	dlg.GetInputValue(sID, sPW, sEtc, nLimit, nFacpType);
 	if (sID.GetLength() < 4)
 	{
 		CMessagePopup dlg(L"계정 관리", L"아이디는 4자리 수 이상 입력하셔야 합니다.", MB_OK, this);
@@ -296,7 +313,7 @@ void CMainTopDlg::OnBnClickedButtonAdd()
 		dlg.DoModal();
 		return;
 	}
-	CClientInterface::Instance()->ProcessRequestAddManager(CCommonState::Instance()->m_nCurrentWorksite, nLimit, sID, sPW, sEtc);
+	CClientInterface::Instance()->ProcessRequestAddManager(CCommonState::Instance()->m_nCurrentWorksite, nLimit, sID, sPW, sEtc, nFacpType);
 	CCommonState::Instance()->m_nManager = -1;
 }
 
@@ -318,14 +335,14 @@ void CMainTopDlg::OnBnClickedButtonMod()
 		return;
 	}
 	CManagerModDlg dlg;
-	dlg.SetManagerValue(CCommonFunc::Utf8ToWCHAR(pInfo->szID), L"", CCommonFunc::Utf8ToWCHAR(pInfo->szEtc), pInfo->nUserLimit);
+	dlg.SetManagerValue(CCommonFunc::Utf8ToWCHAR(pInfo->szID), L"", CCommonFunc::Utf8ToWCHAR(pInfo->szEtc), pInfo->nUserLimit, pInfo->nFacpType);
 	UINT nResult = dlg.DoModal();
 	if (nResult == IDCANCEL) {
 		return;
 	}
 	CString sID, sPW, sEtc;
-	int  nLimit;
-	dlg.GetManagerValue(sID, sPW, sEtc, nLimit);
+	int  nLimit, nFacpType;
+	dlg.GetManagerValue(sID, sPW, sEtc, nLimit, nFacpType);
 	/*if (sID.GetLength() < 4)
 	{
 		CMessagePopup dlg(L"계정 관리", L"아이디는 4자리 수 이상 입력하셔야 합니다.", MB_OK, this);
@@ -344,7 +361,7 @@ void CMainTopDlg::OnBnClickedButtonMod()
 		dlg.DoModal();
 		return;
 	}
-	CClientInterface::Instance()->ProcessRequestModManager(pInfo->nSeq, nLimit, sID, sPW, sEtc);
+	CClientInterface::Instance()->ProcessRequestModManager(pInfo->nSeq, nLimit, sID, sPW, sEtc, nFacpType);
 	CCommonState::Instance()->m_nManager = -1;
 }
 

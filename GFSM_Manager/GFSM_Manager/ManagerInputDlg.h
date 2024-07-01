@@ -20,10 +20,11 @@ public:
 public:
 	CString m_sID, m_sPW, m_sEtc;
 	int m_nLimit;
+	int m_nFacpType;
 	CBrush m_brush;
 
 public:
-	void GetInputValue(CString & sID, CString & sPW, CString & sEtc, int & nLimit);
+	void GetInputValue(CString & sID, CString & sPW, CString & sEtc, int & nLimit, int & nFacpType);
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 지원입니다.
@@ -42,4 +43,5 @@ public:
 	CSkinButton m_btnCancel;
 	CSkinButton m_btnOk;
 	CEdit m_editEtc;
+	CComboBox m_ctrlCBFacpType;
 };

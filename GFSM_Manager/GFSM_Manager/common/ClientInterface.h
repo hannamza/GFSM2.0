@@ -27,8 +27,8 @@ public:
 	void ProcessRequestModSystem(int nSeq, CString sSystemName, CString sLocation, CString sEtc);
 	void ProcessRequestDelSystem(int nSeq);
 
-	void ProcessRequestAddManager(int nWorksiteSeq, int nUserLimit, CString sID, CString sPW, CString sEtc);
-	void ProcessRequestModManager(int nSeq, int nUserLimit, CString szID, CString szPW, CString szEtc);
+	void ProcessRequestAddManager(int nWorksiteSeq, int nUserLimit, CString sID, CString sPW, CString sEtc, int nFacpType);
+	void ProcessRequestModManager(int nSeq, int nUserLimit, CString szID, CString szPW, CString szEtc, int nFacpType);
 	void ProcessRequestDelManager(int nSeq);
 
 	void ProcessRequestAddUser(int nManagerSeq, CString sName, CString sMobile, CString sEtc);

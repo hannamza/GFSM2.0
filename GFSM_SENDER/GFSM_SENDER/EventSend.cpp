@@ -1077,12 +1077,18 @@ void CEventSend::ProcessEventQueue(queue<BYTE*> & queue, DWORD & dwValue, bool b
 		//20230410 GBM start - 프로그램 기동 후 최초는 순차 전송 -> 20230420 GBM - 스레드간 토큰 값이 겹치는 현상을 버퍼 동적할당으로 해결 후 처음부터 병렬 전송으로 전송해도 OK ->
 		//20230814 GBM - 사용자에게 전송을 사용자 별이 아닌 한번에 처리하는 함수 -> 
 		//20231129 GBM - OAuth2테스트를 위해 SendAlarmInParallel로 변경
+
+		//20240628 GBM start - 수신기 타입이 GT1이면 알람 전송하지 않음
+		if (CCommonState::Instance()->m_nFacpType == MANAGER_FACP_TYPE_GT1)
+		{
 #if 1
-		//SendAlarmAtOnce(pDataSave, nSize - 1);
-		SendAlarmInParallel(pDataSave, nSize - 1);
+			//SendAlarmAtOnce(pDataSave, nSize - 1);
+			SendAlarmInParallel(pDataSave, nSize - 1);
 #else
-		SendAlarm(pDataSave, nSize - 1);
+			SendAlarm(pDataSave, nSize - 1);
 #endif
+		}
+		//20240628 GBM end
 		//20230410 GBM end
 	}
 

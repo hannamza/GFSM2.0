@@ -29,6 +29,7 @@ void CManagerModDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_CONFIRM, m_btnOk);
 	DDX_Control(pDX, IDC_EDIT_ETC, m_editEtc);
 	DDX_Control(pDX, IDC_CHECK_PW, m_checkPw);
+	DDX_Control(pDX, IDC_CB_FACP_TYPE, m_ctrlCBFacpType);
 }
 
 
@@ -67,16 +68,31 @@ BOOL CManagerModDlg::OnInitDialog()
 
 	CRect rect, rt;
 	GetDlgItem(IDC_EDIT_ETC)->GetClientRect(&rt);
-	GetDlgItem(IDC_EDIT_ETC)->GetClientRect(&rt);
 	GetDlgItem(IDC_EDIT_ETC)->ClientToScreen(&rt);
 	ScreenToClient(&rt);
 
+	//20240627 GBM start - 수신기 타입 추가
+#if 1
+	::SetWindowPos(m_hWnd, HWND_TOP, 0, 0, rt.right + 60, rt.bottom + 56 + 70 + 30, SWP_NOMOVE);
+
+	GetClientRect(&rect);
+
+	m_btnOk.MoveWindow(rect.Width() / 2 - 120 - 10, rt.bottom + 15 + 30, 120, 36);
+	m_btnCancel.MoveWindow(rect.Width() / 2 + 10, rt.bottom + 15 + 30, 120, 36);
+
+	m_ctrlCBFacpType.AddString(_T("F3"));
+	m_ctrlCBFacpType.AddString(_T("GT1"));
+	m_ctrlCBFacpType.SetCurSel(m_nFacpType);
+
+#else
 	::SetWindowPos(m_hWnd, HWND_TOP, 0, 0, rt.right + 60, rt.bottom + 56 + 70, SWP_NOMOVE);
 
 	GetClientRect(&rect);
 
 	m_btnOk.MoveWindow(rect.Width() / 2 - 120 - 10, rt.bottom + 15, 120, 36);
 	m_btnCancel.MoveWindow(rect.Width() / 2 + 10, rt.bottom + 15, 120, 36);
+#endif
+	//20240627 GBM end
 
 	/*m_editWorksite.SetLimitText(50);
 	m_editLoc.SetLimitText(50);*/
@@ -173,6 +189,7 @@ void CManagerModDlg::OnBnClickedButtonConfirm()
 	CString sTemp;
 	GetDlgItemText(IDC_EDIT_LIMIT, sTemp);
 	m_nLimit = _ttoi(sTemp.GetBuffer(0));
+	m_nFacpType = m_ctrlCBFacpType.GetCurSel();
 
 	if (m_checkPw.GetCheck()) {
 		if (m_sPW.GetLength() < 4) {
@@ -192,18 +209,20 @@ void CManagerModDlg::OnBnClickedButtonCancel()
 	OnCancel();
 }
 
-void CManagerModDlg::SetManagerValue(CString sID, CString sPW, CString sEtc, int nLimit)
+void CManagerModDlg::SetManagerValue(CString sID, CString sPW, CString sEtc, int nLimit, int nFacpType)
 {
 	m_sID = sID;
 	m_sPW = sPW;
 	m_sEtc = sEtc;
 	m_nLimit = nLimit;
+	m_nFacpType = nFacpType;
 }
 
-void CManagerModDlg::GetManagerValue(CString & sID, CString & sPW, CString & sEtc, int & nLimit)
+void CManagerModDlg::GetManagerValue(CString & sID, CString & sPW, CString & sEtc, int & nLimit, int & nFacpType)
 {
 	sID = m_sID;
 	sPW = m_sPW;
 	sEtc = m_sEtc;
 	nLimit = m_nLimit;
+	nFacpType = m_nFacpType;
 }

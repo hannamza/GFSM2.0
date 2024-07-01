@@ -49,6 +49,7 @@ public: // process
 	void ProcessResponseGetUserTokenList(BYTE* pData);
 	void ProcessResponseLogin(BYTE* pData);
 	void ProcessResponseAddEvent(BYTE* pData);
+	void ProcessResponseGetFacpType(BYTE* pData);	//수신기 타입 정보 - 20240628 GBM
 
 protected:
 	void WorkerProcessRecvPacket(BYTE* pPacket, int nSize);

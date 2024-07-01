@@ -8,6 +8,7 @@ CCommonState::CCommonState()
 	m_szID[0] = '\0';
 	m_dwToken = 0;
 	m_dwLastRecv = GetTickCount();
+	m_nFacpType = 0;
 }
 
 

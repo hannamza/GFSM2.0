@@ -95,7 +95,12 @@ BOOL CGFSM_UserDlg::OnInitDialog()
 	Log::SetMainPointer(this);
 
 	CClientInterface::New();
+
+#ifndef LOCAL_TEST_MODE
 	CClientInterface::Instance()->TryConnection("160.202.162.3", 10234);
+#else
+	CClientInterface::Instance()->TryConnection("127.0.0.1", 10234);
+#endif
 
 	CUserManager::New();
 	CCommonState::New();
