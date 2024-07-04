@@ -899,7 +899,15 @@ void CEventSend::SendThreadLoop()
 		strLineNum.Format(L"%c%c%c", pData[9], pData[10], pData[11]);
 
 		strAddress.Format(L"%02s%02s%s%03s", strFACPNum, strUnitNum, strLoopNum, strLineNum);
+		//20240704 GBM start - 기존 입력타입 10번까지만 화재로 보던 것을 GT1 입력타입 추가로 16~21번까지 화재로 처리
+#if 1
+		strType = CDeviceInfo::Instance()->GetDeviceName(strAddress).Left(2);	
+#else
 		strType = CDeviceInfo::Instance()->GetDeviceName(strAddress).Left(1);
+#endif
+		//20240704 GBM end
+
+		//20240704 GBM end
 		sName = CDeviceInfo::Instance()->GetDeviceName(strAddress).Mid(3);
 
 		currTime = CTime::GetCurrentTime();
@@ -931,6 +939,19 @@ void CEventSend::SendThreadLoop()
 			}
 			else if ('F' == pData[2])
 			{
+				//20240704 GBM start - 기존 입력타입 10번까지만 화재로 보던 것을 GT1 입력타입 추가로 16~21번까지 화재로 처리
+#if 1
+				int nInputType = 0;
+				nInputType = _wtoi(strType);
+
+				if ((nInputType >= 자탐감지기 && nInputType <= 연식주소형) || (nInputType >= AN열식교차A && nInputType <= 광센서감지기)) // 화재
+				{
+					SendAll();
+					m_fireQueue.push(pData);
+					m_dwFire = GetTickCount();
+					ProcessEventQueue(m_fireQueue, m_dwFire, true);
+				}
+#else
 				if (strType == "0") // 화재
 				{
 					SendAll();
@@ -938,6 +959,8 @@ void CEventSend::SendThreadLoop()
 					m_dwFire = GetTickCount();
 					ProcessEventQueue(m_fireQueue, m_dwFire, true);
 				}
+#endif
+				//20240704 GBM end
 				else // 감시
 				{
 					m_spyQueue.push(pData);
