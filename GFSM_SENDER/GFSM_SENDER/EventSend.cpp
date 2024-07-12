@@ -1102,7 +1102,7 @@ void CEventSend::ProcessEventQueue(queue<BYTE*> & queue, DWORD & dwValue, bool b
 		//20231129 GBM - OAuth2테스트를 위해 SendAlarmInParallel로 변경
 
 		//20240628 GBM start - 수신기 타입이 GT1이면 알람 전송하지 않음
-		if (CCommonState::Instance()->m_nFacpType == MANAGER_FACP_TYPE_GT1)
+		if (CCommonState::Instance()->m_nFacpType == MANAGER_FACP_TYPE_F3)
 		{
 #if 1
 			//SendAlarmAtOnce(pDataSave, nSize - 1);
