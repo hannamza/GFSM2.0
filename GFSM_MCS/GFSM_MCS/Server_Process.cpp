@@ -1048,7 +1048,13 @@ void Server::ProcessProtocolRequestAddUser(BYTE* pData, Packet* packet)		// 유저
 	CHAR szQuery[2048];
 
 	CDBConnectionManager* pManager = CDBPool::Instance()->GetDbManager(); if (!pManager) return;
+	//20240717 GBM start - 전화번호가 해당 운영자의 사용자 번호와 일치여부뿐만아니라 전체 핸드폰 번호 중에서도 유일해야 하므로 쿼리 수정
+#if 1
+	sprintf_s(szQuery, 2048, "SELECT seq FROM user_account WHERE isuse=1 and mobile='%s'", pReq->szMobile);
+#else
 	sprintf_s(szQuery, 2048, "SELECT seq FROM user_account WHERE isuse=1 and mobile='%s' and manager_seq=%d", pReq->szMobile, pReq->nManagerSeq);
+#endif
+	//20240717 GBM end
 	pRes = pManager->MysqlSelectQuery(szQuery);
 	if (pRes)
 	{
