@@ -1438,6 +1438,7 @@ void Server::ProcessProtocolRequestGetFacpType(BYTE* pData, Packet* packet)
 			{
 				res.nFacpType = atoi(ContentRow[0]);
 			}
+			trace0("ProcessProtocolRequestGetFacpType - manager_seq : %d facptype =%d", pReq->nManagerSeq, res.nFacpType);
 		}
 		else
 		{

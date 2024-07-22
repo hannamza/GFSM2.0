@@ -80,8 +80,10 @@ BOOL CManagerModDlg::OnInitDialog()
 	m_btnOk.MoveWindow(rect.Width() / 2 - 120 - 10, rt.bottom + 15 + 30, 120, 36);
 	m_btnCancel.MoveWindow(rect.Width() / 2 + 10, rt.bottom + 15 + 30, 120, 36);
 
-	m_ctrlCBFacpType.AddString(_T("F3"));
-	m_ctrlCBFacpType.AddString(_T("GT1"));
+	m_ctrlCBFacpType.AddString(_T("F3 / 한글"));
+	m_ctrlCBFacpType.AddString(_T("GT1 / 한글"));
+	m_ctrlCBFacpType.AddString(_T("F3 / 영어"));
+	m_ctrlCBFacpType.AddString(_T("GT1 / 영어"));
 	m_ctrlCBFacpType.SetCurSel(m_nFacpType);
 
 #else

@@ -216,10 +216,33 @@ void CMainTopDlg::ReListup()
 
 			//20240627 GBM start - 수신기 타입 추가
 			CString strFacpType = _T("");
-			if (pInfo->nFacpType == MANAGER_FACP_TYPE_F3)
-				strFacpType = _T("F3");
-			else if (pInfo->nFacpType == MANAGER_FACP_TYPE_GT1)
-				strFacpType = _T("GT1");
+			int nFacpType = -1;
+			nFacpType = pInfo->nFacpType;
+			switch (nFacpType)
+			{
+			case MANAGER_FACP_TYPE_F3_KOREAN:
+			{
+				strFacpType = _T("F3 / 한글");
+				break;
+			}
+			case MANAGER_FACP_TYPE_GT1_KOREAN:
+			{
+				strFacpType = _T("GT1 / 한글");
+				break;
+			}
+			case MANAGER_FACP_TYPE_F3_ENGLISH:
+			{
+				strFacpType = _T("F3 / 영어");
+				break;
+			}
+			case MANAGER_FACP_TYPE_GT1_ENGLISH:
+			{
+				strFacpType = _T("GT1 / 영어");
+				break;
+			}
+			default:
+				break;
+			}
 
 			m_listManager.SetItemText(nIndex, 4, strFacpType, RGB(80, 80, 80), RGB(255, 255, 255));
 			//20240627 GBM end
