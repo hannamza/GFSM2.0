@@ -131,16 +131,33 @@ void Client::ProcessResponseGetFacpType(BYTE* pData)
 	ProtocolResponseGetFacpType* pRes = (ProtocolResponseGetFacpType*)pData;
 
 	int nFacpType = pRes->nFacpType;
-	if (nFacpType >= MANAGER_FACP_TYPE_F3 && nFacpType <= MANAGER_FACP_TYPE_GT1)
+	if (nFacpType >= MANAGER_FACP_TYPE_F3_KOREAN && nFacpType <= MANAGER_FACP_TYPE_GT1_ENGLISH)
 	{
 		CCommonState::Instance()->m_nFacpType = nFacpType;
-		if (nFacpType == MANAGER_FACP_TYPE_F3)
+		switch (nFacpType)
 		{
-			Log::Trace("수신기 타입 F3 - 이벤트 이력과 알람 모두 전송합니다.");
+		case MANAGER_FACP_TYPE_F3_KOREAN:
+		{
+			Log::Trace("수신기 타입 F3 / 한글 - 이벤트 이력과 알람 모두 전송합니다.");
+			break;
 		}
-		else if (nFacpType == MANAGER_FACP_TYPE_GT1)
+		case MANAGER_FACP_TYPE_GT1_KOREAN:
 		{
-			Log::Trace("수신기 타입 GT1 - 이벤트 이력은 전송하지만 알람은 전송하지 않습니다.");
+			Log::Trace("수신기 타입 GT1 / 한글 - 이벤트 이력은 전송하지만 알람은 전송하지 않습니다.");
+			break;
+		}
+		case MANAGER_FACP_TYPE_F3_ENGLISH:
+		{
+			Log::Trace("수신기 타입 F3 / 영어 - 이벤트 이력과 알람 모두 전송합니다.");
+			break;
+		}
+		case MANAGER_FACP_TYPE_GT1_ENGLISH:
+		{
+			Log::Trace("수신기 타입 GT1 / 영어 - 이벤트 이력은 전송하지만 알람은 전송하지 않습니다.");
+			break;
+		}
+		default:
+			break;
 		}
 	}
 	else
