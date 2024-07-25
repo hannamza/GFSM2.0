@@ -36,6 +36,7 @@ void CALLBACK Server::WorkerProcessRecvPacket(PTP_CALLBACK_INSTANCE /* Instance 
 	}
 	if (command < ProtocolHeader::Keep_Alive || command >= ProtocolHeader::DefineEndProtocol)
 	{
+		trace0("WorkerProcessRecvPacket : Invalid Command");
 		return;
 	}
 
@@ -112,8 +113,11 @@ void CALLBACK Server::WorkerProcessRecvPacket(PTP_CALLBACK_INSTANCE /* Instance 
 		ProcessProtocolRequestGetFacpType(pData, packet);
 		break;
 	default:
+	{
+		trace0("WorkerProcessRecvPacket : switch default - %d", command);
 		Server::Instance()->Echo(packet);
 		break;
+	}
 	}
 }
 
@@ -1446,6 +1450,8 @@ void Server::ProcessProtocolRequestGetFacpType(BYTE* pData, Packet* packet)
 			res.nFacpType = 0;
 		}
 	}
+
+	CDBPool::Instance()->ReturnDBManager(pManager);
 
 	Server::Instance()->Send(packet, (BYTE*)&res, sizeof(ProtocolResponseGetFacpType));
 }

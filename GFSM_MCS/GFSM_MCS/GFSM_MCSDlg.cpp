@@ -158,7 +158,7 @@ BOOL CGFSM_MCSDlg::OnInitDialog()
 
 	CDBPool::New();
 	CDBPool::Instance()->SetDBInformation(info);
-	CDBPool::Instance()->StartDBPool(8);
+	CDBPool::Instance()->StartDBPool(100);
 
 	CEncDec::New();
 

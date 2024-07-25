@@ -157,7 +157,10 @@ void Client::ProcessResponseGetFacpType(BYTE* pData)
 			break;
 		}
 		default:
+		{
+			Log::Trace("알 수 없는 수신기 타입입니다.");
 			break;
+		}
 		}
 	}
 	else

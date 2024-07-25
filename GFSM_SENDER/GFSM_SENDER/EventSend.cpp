@@ -1000,6 +1000,11 @@ void CEventSend::SendThreadLoop()
 
 void CEventSend::ProcessEventQueue(queue<BYTE*> & queue, DWORD & dwValue, bool bSend /*= false*/)
 {
+	//20240725 GBM start - 전송하기 전에 수신기 타입 받아옴
+	int nManagerSeq = CCommonState::Instance()->m_nIdx;
+	CClientInterface::Instance()->ProcessRequestGetFacpType(nManagerSeq);
+	//20240725 GBM end
+
 	int nSize = queue.size();
 	if (nSize == 0) {
 		return;
@@ -1102,6 +1107,10 @@ void CEventSend::ProcessEventQueue(queue<BYTE*> & queue, DWORD & dwValue, bool b
 		//20231129 GBM - OAuth2테스트를 위해 SendAlarmInParallel로 변경
 
 		//20240628 GBM start - 수신기 타입이 GT1이면 알람 전송하지 않음
+		int nFacpType = CCommonState::Instance()->m_nFacpType;
+		CString strMsg = _T("");
+		strMsg.Format(_T("수신기 타입 : %d"), nFacpType);
+		Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
 		if (CCommonState::Instance()->m_nFacpType == MANAGER_FACP_TYPE_F3_KOREAN || CCommonState::Instance()->m_nFacpType == MANAGER_FACP_TYPE_F3_ENGLISH)
 		{
 #if 1
@@ -1110,6 +1119,7 @@ void CEventSend::ProcessEventQueue(queue<BYTE*> & queue, DWORD & dwValue, bool b
 #else
 			SendAlarm(pDataSave, nSize - 1);
 #endif
+			Log::Trace("Event Alarm Send!");
 		}
 		//20240628 GBM end
 		//20230410 GBM end

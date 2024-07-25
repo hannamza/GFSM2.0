@@ -592,20 +592,6 @@ void CGFSM_SENDERDlg::OnBnClickedButtonStart()
 		return;
 	}
 
-	//20240628 GBM start - 수신기 타입 정보, 이 시점에서는 정상적인 상태라면 CCommonState정보가 채워진 상태
-	int nManagerSeq = 0;
-	CHAR* pManagerID = nullptr;
-
-	nManagerSeq = CCommonState::Instance()->m_nIdx;
-	if (nManagerSeq <= 0)
-	{
-		Log::Trace("Manager Seq 정보가 없습니다.");
-		return;
-	}
-	
-	CClientInterface::Instance()->ProcessRequestGetFacpType(nManagerSeq);
-	//20240628 GBM end
-
 	Log::Trace("Sender start...");
 
 	CDeviceInfo::New();
@@ -877,26 +863,36 @@ void CGFSM_SENDERDlg::OnBnClickedButtonEvent()
 	CDlgEventTest dlg;
 	if (dlg.DoModal() == IDOK)
 	{
-		// 회로 최대 수용 개수가 1만개가 조금 넘으므로 최대 이만큼을 잡고 1000개 정도의 마진을 두어 인덱스가 여기까지 도달하면 초기화
-		if ((m_nBufPos + (SI_EVENT_BUF_SIZE + 1) * 1000) >= ((SI_EVENT_BUF_SIZE + 1) * 20000))
+		int nEventCount = dlg.m_nEventCount;
+		if (nEventCount < 0)
 		{
-			m_nBufPos = 0;
-		}
-		pData = &m_ringBuffer[m_nBufPos];
-
-		memcpy(pData, dlg.m_eventBuf, SI_EVENT_BUF_SIZE);
-		Sleep(500);
-
-		CEventSend::Instance()->SendEvent(pData);
-		m_nBufPos += SI_EVENT_BUF_SIZE + 1;
-
-		CString strBuf = _T("");
-		for (int i = 0; i < SI_EVENT_BUF_SIZE; i++)
-		{
-			strBuf += pData[i];
+			Log::Trace("Event Count < 0");
+			return;
 		}
 
-		Log::Trace("Event Test - [%s] EventQueue Added!", CCommonFunc::WCharToChar(strBuf.GetBuffer(0)));
+		for (int nEvent = 0; nEvent < nEventCount; nEvent++)
+		{
+			// 회로 최대 수용 개수가 1만개가 조금 넘으므로 최대 이만큼을 잡고 1000개 정도의 마진을 두어 인덱스가 여기까지 도달하면 초기화
+			if ((m_nBufPos + (SI_EVENT_BUF_SIZE + 1) * 1000) >= ((SI_EVENT_BUF_SIZE + 1) * 20000))
+			{
+				m_nBufPos = 0;
+			}
+			pData = &m_ringBuffer[m_nBufPos];
+
+			memcpy(pData, dlg.m_eventBuf, SI_EVENT_BUF_SIZE);
+			Sleep(500);
+
+			CEventSend::Instance()->SendEvent(pData);
+			m_nBufPos += SI_EVENT_BUF_SIZE + 1;
+
+			CString strBuf = _T("");
+			for (int i = 0; i < SI_EVENT_BUF_SIZE; i++)
+			{
+				strBuf += pData[i];
+			}
+
+			Log::Trace("Event Test - [%s] EventQueue Added!", CCommonFunc::WCharToChar(strBuf.GetBuffer(0)));
+		}
 	}
 #else
 	CDlgEventTest dlg;

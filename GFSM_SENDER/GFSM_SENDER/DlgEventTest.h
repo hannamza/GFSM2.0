@@ -31,10 +31,12 @@ public:
 	CComboBox m_ctrlComboSystemNo;
 	CComboBox m_ctrlComboCircuitNo;
 	CComboBox m_ctrlComboOccerInfo;
+	int m_nEventCount;
 
 	BYTE m_eventBuf[SI_EVENT_BUF_SIZE];
 	void InitControl();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	BOOL MakeEventBuf();
 	afx_msg void OnCbnSelchangeComboCommand();
+	CEdit m_ctrlEditEventCount;
 };

@@ -14,7 +14,7 @@ IMPLEMENT_DYNAMIC(CDlgEventTest, CDialogEx)
 CDlgEventTest::CDlgEventTest(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_TEST_DIALOG, pParent)
 {
-
+	m_nEventCount = 1;
 }
 
 CDlgEventTest::~CDlgEventTest()
@@ -30,6 +30,7 @@ void CDlgEventTest::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO_SYSTEM_NO, m_ctrlComboSystemNo);
 	DDX_Control(pDX, IDC_COMBO_CIRCUIT_NO, m_ctrlComboCircuitNo);
 	DDX_Control(pDX, IDC_COMBO_OCCUR_INFO, m_ctrlComboOccerInfo);
+	DDX_Control(pDX, IDC_EDIT_EVENT_COUNT, m_ctrlEditEventCount);
 }
 
 
@@ -123,6 +124,8 @@ void CDlgEventTest::InitControl()
 	}
 
 	m_ctrlComboOccerInfo.SetCurSel(0);
+
+	m_ctrlEditEventCount.SetWindowText(_T("1"));
 }
 
 BOOL CDlgEventTest::PreTranslateMessage(MSG* pMsg)
@@ -184,6 +187,32 @@ BOOL CDlgEventTest::MakeEventBuf()
 
 	nIndex = m_ctrlComboOccerInfo.GetCurSel();
 	m_eventBuf[SI_EVENT_BUF_OCCUR_INFO] = g_lpszOccurInfo[nIndex];
+
+	CString strEventCount = _T("");
+	m_ctrlEditEventCount.GetWindowText(strEventCount);
+	m_nEventCount = _wtoi(strEventCount);
+
+	if (m_nEventCount < 1)
+	{
+		AfxMessageBox(_T("이벤트 개수는 1보다 작을 수 없습니다."));
+		return FALSE;
+	}
+	else if (m_nEventCount > 5)
+	{
+		AfxMessageBox(_T("이벤트 개수는 5보다 클 수 없습니다."));
+		return FALSE;
+	}
+	else
+	{
+		if ((nCommandIndex == COMMAND_FIRE) || (nCommandIndex == COMMAND_RECOVER))
+		{
+			if (m_nEventCount > 1)
+			{
+				AfxMessageBox(_T("화재 이벤트와 수신기 복구 이벤트는 1회 이상할 수 없습니다."));
+				return FALSE;
+			}
+		}
+	}
 
 	return TRUE;
 }
