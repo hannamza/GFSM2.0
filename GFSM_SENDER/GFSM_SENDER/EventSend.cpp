@@ -1234,7 +1234,7 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 #ifndef ENGLISH_MODE
 			strPosition = L"단선";
 #else
-			strPosition = L"Trouble";
+			strPosition = L"TROUBLE";
 #endif
 			strSecond.Format(L"03x");
 		}
@@ -1245,7 +1245,7 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 #ifndef ENGLISH_MODE
 				strPosition = L"화재";
 #else
-				strPosition = L"Alarm";
+				strPosition = L"ALARM";
 #endif
 				strSecond.Format(L"00x");
 			}
@@ -1254,7 +1254,7 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 #ifndef ENGLISH_MODE
 				strPosition = L"감시";
 #else
-				strPosition = L"Supervisory";
+				strPosition = L"SUPERVISORY";
 #endif
 				strSecond.Format(L"02x");
 			}
@@ -1264,7 +1264,7 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 #ifndef ENGLISH_MODE
 				strPosition = L"감시";
 #else
-				strPosition = L"Supervisory";
+				strPosition = L"SUPERVISORY";
 #endif
 				strSecond.Format(L"02x");
 			}
@@ -1274,7 +1274,7 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 #ifndef ENGLISH_MODE
 			strPosition = L"감시";
 #else
-			strPosition = L"Supervisory";
+			strPosition = L"SUPERVISORY";
 #endif
 			strSecond.Format(L"02x");
 		}
@@ -1283,7 +1283,7 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 #ifndef ENGLISH_MODE
 			strPosition = L"가스";
 #else
-			strPosition = L"Gas";
+			strPosition = L"GAS";
 #endif
 			strSecond.Format(L"01x");
 		}
@@ -1310,7 +1310,7 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 			}
 #else
 			if (sTitle != L"FACP Restored") {
-				sTitle += L" Restored";
+				sTitle += L" RESTORATION";
 			}
 #endif
 			strFirst.Format(L"Dx");
@@ -1324,12 +1324,21 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 			sName);
 	}
 
+#ifndef ENGLISH_MODE
 	sTemp = L"";
 	if (nSendCount >= 1) {
 		sTemp.Format(L" (외 %d건)", nSendCount);
 	}
 
 	sTitle += sTemp;
+#else
+	sTemp = L"";
+	if (nSendCount >= 1) {
+		sTemp.Format(L"%d INCIDENTS BESIDES ", nSendCount);
+	}
+
+	sTitle = sTemp + sTitle;
+#endif
 
 	if ("R" == sUni)
 	{
