@@ -2825,9 +2825,6 @@ void CXListCtrl::InitList(CXListCtrl& list, const TCHAR** pszTitle)
 	list.m_HeaderCtrl.SetHeight(30);
 
 	// 헤더 폰트 설정
-
-	// 20230417 GBM start - 윈도우 11에서 헤더 텍스트 삐져 나오는 현상없애기 위한 폰트 적용
-#if 1
 	list.m_listHeaderFont.CreateFont(18, // nHeight 
 		0, // nWidth 
 		0, // nEscapement 
@@ -2843,10 +2840,6 @@ void CXListCtrl::InitList(CXListCtrl& list, const TCHAR** pszTitle)
 		DEFAULT_PITCH | FF_DONTCARE,  // nPitchAndFamily 
 		_T("arial")); // lpszFacename 
 	list.m_HeaderCtrl.SetTextFont(&list.m_listHeaderFont);
-#else
-	list.m_HeaderCtrl.SetTextFont(Global.GetFont(IDX_FONT_SMALL));
-#endif
-	//20230417 GBM end
 }
 
 void CXListCtrl::ResizeListColumn(CXListCtrl& list, const int* arrWidth)

@@ -211,7 +211,7 @@ void CClientInterface::ProcessRequestAddManager(int nWorksiteSeq, int nUserLimit
 	strcpy_s(manager.szID, CCommonFunc::WcharToUtf8(sID.GetBuffer(0)));
 	strcpy_s(manager.szPW, CCommonFunc::WcharToUtf8(sPW.GetBuffer(0)));
 	strcpy_s(manager.szEtc, CCommonFunc::WcharToUtf8(sEtc.GetBuffer(0)));
-	manager.nFacpType = nFacpType;	//20240627 GBM - 수신기 타입 추가
+	manager.nFacpType = nFacpType;
 
 	Log::Trace("매니저 추가 요청(%d, %d, %s, %s, %d)", manager.nWorksiteSeq, manager.nUserLimit, manager.szID, manager.szEtc, manager.nFacpType);
 
@@ -226,7 +226,7 @@ void CClientInterface::ProcessRequestModManager(int nSeq, int nUserLimit, CStrin
 	strcpy_s(manager.szID, CCommonFunc::WcharToUtf8(sID.GetBuffer(0)));
 	strcpy_s(manager.szPW, CCommonFunc::WcharToUtf8(sPW.GetBuffer(0)));
 	strcpy_s(manager.szEtc, CCommonFunc::WcharToUtf8(sEtc.GetBuffer(0)));
-	manager.nFacpType = nFacpType;	//20240627 GBM - 수신기 타입 추가
+	manager.nFacpType = nFacpType;
 
 	Log::Trace("매니저 수정 요청(%d, %d, %s, %s, %d)", manager.nSeq, manager.nUserLimit, manager.szID, manager.szEtc, manager.nFacpType);
 

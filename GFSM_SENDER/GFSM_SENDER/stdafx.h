@@ -13,16 +13,15 @@
 
 #define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS      // 일부 CString 생성자는 명시적으로 선언됩니다.
 
-//20240627 GBM start - 관리자에 따른 수신기 타입 추가
+// 관리자에 따른 수신기 타입
 enum {
 	MANAGER_FACP_TYPE_F3_KOREAN,
 	MANAGER_FACP_TYPE_GT1_KOREAN,
 	MANAGER_FACP_TYPE_F3_ENGLISH,
 	MANAGER_FACP_TYPE_GT1_ENGLISH
 };
-//20240627 GBM end
 
-//20240704 GBM start - 이벤트 타입 구분을 위한 입력타입 enum 추가
+// 이벤트 타입 구분을 위한 입력타입 enum
 enum {
 	자탐감지기 = 1,
 	A교차감지기,
@@ -48,7 +47,6 @@ enum {
 	CCTV,
 	NMS
 };
-//20240704 GBM end
 
 // MFC의 공통 부분과 무시 가능한 경고 메시지에 대한 숨기기를 해제합니다.
 #define _AFX_ALL_WARNINGS
@@ -86,8 +84,7 @@ using namespace std;
 extern HANDLE G_hShutdown_Event;
 extern CGlobal Global;
 
-//20230207 GBM start - GBM 정의 추가
-//20230207 GBM - 이벤트 테스트 플래그, 배포 시에는 주석처리
+// 이벤트 테스트 플래그, 배포 시에는 주석처리
 //#define EVENT_TEST_MODE	
 
 //Push Message 시간 측정 테스트 플래그
@@ -182,8 +179,6 @@ static const TCHAR g_lpszOccurInfo[] = {
 #define PROGRAM_NAME	"GFSM 이벤트 관리자"
 
 #define PROGRAM_VERSION	3.0
-
-//20230207 GBM end
 
 #ifndef _AFX_NO_OLE_SUPPORT
 #include <afxdtctl.h>           // Internet Explorer 4 공용 컨트롤에 대한 MFC 지원입니다.

@@ -20,12 +20,11 @@
 
 #define PROGRAM_VERSION	3.0
 
-//20240627 GBM start - 관리자에 따른 수신기 타입 추가
+// 관리자에 따른 수신기 타입 추가
 enum {
 	MANAGER_FACP_TYPE_F3,
 	MANAGER_FACP_TYPE_GT1
 };
-//20240627 GBM end
 
 #include <afxwin.h>         // MFC 핵심 및 표준 구성 요소입니다.
 #include <afxext.h>         // MFC 확장입니다.

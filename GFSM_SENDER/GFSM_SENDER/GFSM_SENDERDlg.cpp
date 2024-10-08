@@ -62,10 +62,9 @@ CGFSM_SENDERDlg::CGFSM_SENDERDlg(CWnd* pParent /*=NULL*/)
 	m_bKilled = false;
 	m_bAutoLogin = false;
 
-	//20230420 GBM start - 링버퍼 추가
+	// 링버퍼 추가
 	memset(m_ringBuffer, 0, (SI_EVENT_BUF_SIZE + 1) * 20000);
 	m_nBufPos = 0;
-	//20230420 GBM end
 
 	m_bAdminMode = FALSE;
 }
@@ -143,11 +142,10 @@ BOOL CGFSM_SENDERDlg::OnInitDialog()
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 
-	//20240129 GBM start - 타이틀 바에 버전 표시
+	// 타이틀 바에 버전 표시
 	CString strTitle = _T("");
 	strTitle.Format(_T("%s v%.1f"), CCommonFunc::CharToWCHAR(PROGRAM_NAME), PROGRAM_VERSION);
 	SetWindowText(strTitle);
-	//20240129 GBM end
 
 	::SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX | SEM_NOOPENFILEERRORBOX);
 
@@ -186,13 +184,11 @@ BOOL CGFSM_SENDERDlg::OnInitDialog()
 		m_comboPort.SetCurSel(0);
 	}
 
-	//20230207 GBM start - test 추후 아이피 원복 필요
 #ifndef EVENT_TEST_MODE
 	strcpy_s(m_szServerIP, "160.202.162.3");/*"192.168.1.222"*/
 #else
 	strcpy_s(m_szServerIP, "127.0.0.1");
 #endif
-	//20230207 GBM end
 
 	CClientInterface::New();
 	CClientInterface::Instance()->TryConnection(m_szServerIP, 10234);
@@ -829,14 +825,11 @@ void CGFSM_SENDERDlg::OnBnClickedButtonEvent()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
-	//20240122 GBM start - test
 #ifdef _DEBUG
 	m_bAdminMode = TRUE;
 #endif
-	//20240122 GBM end
 
-	//20230420 GBM start - 메모리 누수 방지를 위해 링버퍼로 구성 변경
-#if 1
+	// 메모리 누수 방지를 위해 링버퍼로 구성 변경
 	if (!m_bAdminMode)
 	{
 		CDlgPW dlgPW;
@@ -894,26 +887,4 @@ void CGFSM_SENDERDlg::OnBnClickedButtonEvent()
 			Log::Trace("Event Test - [%s] EventQueue Added!", CCommonFunc::WCharToChar(strBuf.GetBuffer(0)));
 		}
 	}
-#else
-	CDlgEventTest dlg;
-	if (dlg.DoModal() == IDOK)
-	{
-		BYTE* pData = new BYTE[SI_EVENT_BUF_SIZE];
-		memset(pData, NULL, SI_EVENT_BUF_SIZE);
-		memcpy(pData, dlg.m_eventBuf, SI_EVENT_BUF_SIZE);
-
-		Sleep(500);
-
-		CEventSend::Instance()->SendEvent(pData);
-
-		CString strBuf = _T("");
-		for (int i = 0; i < SI_EVENT_BUF_SIZE; i++)
-		{
-			strBuf += pData[i];
-		}
-
-		Log::Trace("Event Test - [%s] EventQueue Added!", CCommonFunc::WCharToChar(strBuf.GetBuffer(0)));
-	}
-#endif
-	//20230420 GBM end
 }

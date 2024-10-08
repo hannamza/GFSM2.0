@@ -47,7 +47,7 @@ void Client::WorkerProcessRecvPacket(BYTE* pPacket, int nSize)
 		CCommonState::Instance()->m_dwLastRecv = GetTickCount();
 		TRACE("ProtocolHeader::ResponseGetUserTokenList\n");
 		break;
-	case ProtocolHeader::ResponseGetFacpType:						// 수신기 타입 - 20240628 GBM 
+	case ProtocolHeader::ResponseGetFacpType:						// 수신기 타입
 		ProcessResponseGetFacpType(pData);
 		CCommonState::Instance()->m_dwLastRecv = GetTickCount();
 		TRACE("ProtocolHeader::ProcessResponseGetFacpType\n");

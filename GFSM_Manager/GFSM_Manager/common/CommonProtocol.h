@@ -258,7 +258,7 @@ public:
 		char szID[32];
 		char szEtc[256];
 		char szRegdate[32];
-		int nFacpType;	//20240627 GBM - 수신기 타입 0:F3, 1:GT1
+		int nFacpType;	// 수신기 타입 0:F3, 1:GT1
 	};
 	int nCount;
 	managerInfo info[0];
@@ -279,7 +279,7 @@ public:
 	char szID[32];
 	char szPW[32];
 	char szEtc[256];
-	int nFacpType;	//20240627 GBM - 수신기 타입 0:F3, 1:GT1
+	int nFacpType;	// 수신기 타입 0:F3, 1:GT1
 };
 
 //--------------------------------------------------------------------------------------
@@ -298,7 +298,7 @@ public:
 	char szID[32];
 	char szPW[32];
 	char szEtc[256];
-	int nFacpType;	//20240627 GBM - 수신기 타입 0:F3, 1:GT1
+	int nFacpType;	// 수신기 타입 0:F3, 1:GT1
 };
 
 //--------------------------------------------------------------------------------------

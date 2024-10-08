@@ -109,7 +109,7 @@ void CALLBACK Server::WorkerProcessRecvPacket(PTP_CALLBACK_INSTANCE /* Instance 
 	case ProtocolHeader::RequestGetEventListEnc:
 		ProcessProtocolRequestGetEventListEnc(pData, packet);
 		break;
-	case ProtocolHeader::RequestGetFacpType:		// 수신기 타입 정보 - 20240628 GBM
+	case ProtocolHeader::RequestGetFacpType:		// 수신기 타입 정보
 		ProcessProtocolRequestGetFacpType(pData, packet);
 		break;
 	default:
@@ -706,15 +706,9 @@ void Server::ProcessProtocolRequestGetManagerList(BYTE* pData, Packet* packet)
 
 	CDBConnectionManager* pManager = CDBPool::Instance()->GetDbManager(); if (!pManager) return;
 
-	//20240627 GBM start - 수신기 타입 추가
-#if 1
+	// 수신기 타입 (facp_type) 추가
 	sprintf_s(szQuery, 2048, "SELECT seq, worksite_seq, user_limit, id, etc, regdate, facp_type FROM manager_account WHERE worksite_seq=%d AND isuse='1'"
 	, pReq->nValue);
-#else
-	sprintf_s(szQuery, 2048, "SELECT seq, worksite_seq, user_limit, id, etc, regdate FROM manager_account WHERE worksite_seq=%d AND isuse='1'"
-		, pReq->nValue);
-#endif
-	//20240627 GBM end
 
 	pRes = pManager->MysqlSelectQuery(szQuery);
 
@@ -739,7 +733,7 @@ void Server::ProcessProtocolRequestGetManagerList(BYTE* pData, Packet* packet)
 			strcat(pResult->info[nIndex].szEtc, (char*)ContentRow[4]);
 			strcat(pResult->info[nIndex].szRegdate, (char*)ContentRow[5]);
 
-			//20240627 GBM start - 수신기 타입 0:F3, 1:GT1
+			// 수신기 타입 0:F3, 1:GT1
 			char* pFacpType = NULL;
 			pFacpType = (char*)ContentRow[6];
 			if (pFacpType != NULL)
@@ -750,7 +744,6 @@ void Server::ProcessProtocolRequestGetManagerList(BYTE* pData, Packet* packet)
 			{
 				pResult->info[nIndex].nFacpType = 0;
 			}
-			//20240627 GBM end
 
 			nIndex++;
 		}
@@ -809,15 +802,10 @@ void Server::ProcessProtocolRequestAddManager(BYTE* pData, Packet* packet)
 		pManager->ReleaseSelectQuery(pRes);
 	}
 
-	//20240627 GBM start - 수신기 타입 정보 추가
-#if 1
+	// 수신기 타입 정보 (facp_type) 추가
 	sprintf_s(szQuery, 2048, "INSERT INTO manager_account(worksite_seq, user_limit, id, pw, etc, facp_type) VALUES(%d, %d, '%s', PASSWORD('%s'), '%s', %d)"
 		, pReq->nWorksiteSeq, pReq->nUserLimit, pReq->szID, pReq->szPW, pReq->szEtc, pReq->nFacpType);
-#else
-	sprintf_s(szQuery, 2048, "INSERT INTO manager_account(worksite_seq, user_limit, id, pw, etc) VALUES(%d, %d, '%s', PASSWORD('%s'), '%s')"
-		, pReq->nWorksiteSeq, pReq->nUserLimit, pReq->szID, pReq->szPW, pReq->szEtc);
-#endif
-	//20240627 GBM end
+
 	if (pManager->MysqlExcuteQuery(szQuery))
 	{
 		res.nResult = 0; // success
@@ -861,8 +849,7 @@ void Server::ProcessProtocolRequestModManager(BYTE* pData, Packet* packet)
 		pManager->ReleaseSelectQuery(pRes);
 	}
 
-	//20240627 GBM start - 수신기 타입 추가
-#if 1
+	// 수신기 타입 (facp_type) 추가
 	if (strlen(pReq->szPW) > 0) {
 		sprintf_s(szQuery, 2048, "UPDATE manager_account SET pw=PASSWORD('%s'), user_limit=%d, etc='%s', facp_type=%d WHERE seq=%d"
 			, pReq->szPW, pReq->nUserLimit, pReq->szEtc, pReq->nFacpType, pReq->nSeq);
@@ -871,17 +858,6 @@ void Server::ProcessProtocolRequestModManager(BYTE* pData, Packet* packet)
 		sprintf_s(szQuery, 2048, "UPDATE manager_account SET user_limit=%d, etc='%s', facp_type=%d WHERE seq=%d"
 			, pReq->nUserLimit, pReq->szEtc, pReq->nFacpType, pReq->nSeq);
 	}
-#else
-	if (strlen(pReq->szPW) > 0) {
-		sprintf_s(szQuery, 2048, "UPDATE manager_account SET pw=PASSWORD('%s'), user_limit=%d, etc='%s' WHERE seq=%d"
-			, pReq->szPW, pReq->nUserLimit, pReq->szEtc, pReq->nSeq);
-}
-	else {
-		sprintf_s(szQuery, 2048, "UPDATE manager_account SET user_limit=%d, etc='%s' WHERE seq=%d"
-			, pReq->nUserLimit, pReq->szEtc, pReq->nSeq);
-	}
-#endif
-	//20240627 GBM end
 
 	if (pManager->MysqlExcuteQuery(szQuery))
 	{
@@ -1052,13 +1028,8 @@ void Server::ProcessProtocolRequestAddUser(BYTE* pData, Packet* packet)		// 유저
 	CHAR szQuery[2048];
 
 	CDBConnectionManager* pManager = CDBPool::Instance()->GetDbManager(); if (!pManager) return;
-	//20240717 GBM start - 전화번호가 해당 운영자의 사용자 번호와 일치여부뿐만아니라 전체 핸드폰 번호 중에서도 유일해야 하므로 쿼리 수정
-#if 1
+	// 전화번호가 해당 운영자의 사용자 번호와 일치여부뿐만아니라 전체 핸드폰 번호 중에서도 유일해야 하므로 쿼리 수정 (조건에 isuse 추가)
 	sprintf_s(szQuery, 2048, "SELECT seq FROM user_account WHERE isuse=1 and mobile='%s'", pReq->szMobile);
-#else
-	sprintf_s(szQuery, 2048, "SELECT seq FROM user_account WHERE isuse=1 and mobile='%s' and manager_seq=%d", pReq->szMobile, pReq->nManagerSeq);
-#endif
-	//20240717 GBM end
 	pRes = pManager->MysqlSelectQuery(szQuery);
 	if (pRes)
 	{

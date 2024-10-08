@@ -48,16 +48,15 @@ extern CGlobal Global;
 
 #define PROGRAM_VERSION	3.0
 
-//20240627 GBM start - 관리자에 따른 수신기 타입 추가
+// 관리자에 따른 수신기 타입 추가
 enum {
 	MANAGER_FACP_TYPE_F3_KOREAN,
 	MANAGER_FACP_TYPE_GT1_KOREAN,
 	MANAGER_FACP_TYPE_F3_ENGLISH,
 	MANAGER_FACP_TYPE_GT1_ENGLISH,
 };
-//20240627 GBM end
 
-//#define		LOCAL_TEST_MODE		//20240627 GBM - 실제 적용 전 로컬 PC에서 사용하기 위해 해당 정의로 IP 변경되도록 함
+//#define		LOCAL_TEST_MODE		// 실제 적용 전 로컬 PC에서 사용하기 위해 해당 정의로 IP 변경되도록 함
 
 #include <string>
 using namespace std;

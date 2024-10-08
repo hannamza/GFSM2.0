@@ -68,15 +68,8 @@ END_MESSAGE_MAP()
 
 // CMainTopDlg 메시지 처리기입니다.
 
-//20240627 GBM start - 수신기 타입 추가
-#if 1
 const TCHAR* lpszHeaderManager[] = { _T("No"), _T("아이디"), _T("사용자 제한"), _T("비고"), _T("수신기 타입"), NULL };
 const int colWidthListManager[] = { 15, 50, 50, 80, 50, 0 };
-#else
-const TCHAR* lpszHeaderManager[] = { _T("No"), _T("아이디"), _T("사용자 제한"), _T("비고"), NULL };
-const int colWidthListManager[] = { 15, 50, 50, 80, 0 };
-#endif
-//20240627 GBM end
 
 BOOL CMainTopDlg::OnInitDialog()
 {
@@ -214,7 +207,7 @@ void CMainTopDlg::ReListup()
 			m_listManager.SetItemText(nIndex, 3, CCommonFunc::Utf8ToWCHAR(pInfo->szEtc), RGB(80, 80, 80), RGB(255, 255, 255));
 			m_listManager.SetItemData(nIndex, (DWORD)pInfo);
 
-			//20240627 GBM start - 수신기 타입 추가
+			// 수신기 타입 추가
 			CString strFacpType = _T("");
 			int nFacpType = -1;
 			nFacpType = pInfo->nFacpType;
@@ -245,7 +238,6 @@ void CMainTopDlg::ReListup()
 			}
 
 			m_listManager.SetItemText(nIndex, 4, strFacpType, RGB(80, 80, 80), RGB(255, 255, 255));
-			//20240627 GBM end
 		}
 	}
 }

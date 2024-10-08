@@ -110,16 +110,11 @@ BOOL CGFSM_MCSDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
-	
-	//20230316 GBM start - git hub test
-	int a = 0;
-	//20230316 GBM end
 
-	//20240628 GBM start - 타이틀 바에 버전 표시
+	// 타이틀 바에 버전 표시
 	CString strTitle = _T("");
 	strTitle.Format(_T("%s v%.1f"), CCommonFunc::CharToWCHAR(PROGRAM_NAME), PROGRAM_VERSION);
 	SetWindowText(strTitle);
-	//20240628 GBM end
 
 	m_nServerPort = 10234;
 	m_nLimitClient = 1000;

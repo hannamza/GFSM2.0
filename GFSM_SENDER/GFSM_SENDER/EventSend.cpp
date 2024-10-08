@@ -63,12 +63,10 @@ typedef struct {
 
 UINT SendAlarmThread(LPVOID param)
 {
-	//20230320 GBM start - test
 #ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
 	LARGE_INTEGER startTime, endTime;
 	QueryPerformanceCounter(&startTime);
 #endif
-	//20230320 GBM end
 
 	ALARM_INFO* pAi;
 	pAi = (ALARM_INFO*)param;
@@ -213,13 +211,11 @@ UINT SendAlarmThread(LPVOID param)
 	::InternetCloseHandle(hConnect);
 	//
 
-	//20230320 GBM start - test
 #ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
 	QueryPerformanceCounter(&endTime);
 	double duringTime = CCommonFunc::GetPreciseTime(startTime, endTime);
 	Log::Trace("%d 스레드 FCM Push Message 처리 시간 : %f", userIndex, duringTime);
 #endif
-	//20230320 GBM end
 
 	//
 	delete[] szSendData;
@@ -234,15 +230,13 @@ UINT SendAlarmThread(LPVOID param)
 	return 0;
 }
 
-//20231129 GBM start - OAuth2 테스트를 위한 스레드
+// OAuth2 테스트를 위한 스레드
 UINT SendAlarmWithOAuth2Thread(LPVOID param)
 {
-	//20230320 GBM start - test
 #ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
 	LARGE_INTEGER startTime, endTime;
 	QueryPerformanceCounter(&startTime);
 #endif
-	//20230320 GBM end
 
 	ALARM_INFO* pAi;
 	pAi = (ALARM_INFO*)param;
@@ -408,13 +402,11 @@ UINT SendAlarmWithOAuth2Thread(LPVOID param)
 	::InternetCloseHandle(hConnect);
 	//
 
-	//20230320 GBM start - test
 #ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
 	QueryPerformanceCounter(&endTime);
 	double duringTime = CCommonFunc::GetPreciseTime(startTime, endTime);
 	Log::Trace("%d 스레드 FCM Push Message 처리 시간 : %f", userIndex, duringTime);
 #endif
-	//20230320 GBM end
 
 	//
 	delete[] szSendData;
@@ -428,9 +420,8 @@ UINT SendAlarmWithOAuth2Thread(LPVOID param)
 
 	return 0;
 }
-//20231129 GBM end
 
-//20240122 GBM start - FCM에서 가산서버 Web Server쪽으로 이벤트 던짐
+// FCM에서 가산서버 Web Server쪽으로 이벤트 던짐
 BOOL SendRequestWebServer()
 {
 
@@ -512,12 +503,10 @@ BOOL SendRequestWebServer()
 
 UINT SendAlarmWebServerThread(LPVOID param)
 {
-	//20230320 GBM start - test
 #ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
 	LARGE_INTEGER startTime, endTime;
 	QueryPerformanceCounter(&startTime);
 #endif
-	//20230320 GBM end
 
 	ALARM_INFO* pAi;
 	pAi = (ALARM_INFO*)param;
@@ -690,13 +679,11 @@ UINT SendAlarmWebServerThread(LPVOID param)
 	::InternetCloseHandle(hConnect);
 	//
 
-	//20230320 GBM start - test
 #ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
 	QueryPerformanceCounter(&endTime);
 	double duringTime = CCommonFunc::GetPreciseTime(startTime, endTime);
 	Log::Trace("%d 스레드 FCM Push Message 처리 시간 : %f", userIndex, duringTime);
 #endif
-	//20230320 GBM end
 
 	//
 	delete[] szSendData;
@@ -710,7 +697,6 @@ UINT SendAlarmWebServerThread(LPVOID param)
 
 	return 0;
 }
-//20240122 GBM end
 
 CEventSend::CEventSend()
 {
@@ -899,15 +885,10 @@ void CEventSend::SendThreadLoop()
 		strLineNum.Format(L"%c%c%c", pData[9], pData[10], pData[11]);
 
 		strAddress.Format(L"%02s%02s%s%03s", strFACPNum, strUnitNum, strLoopNum, strLineNum);
-		//20240704 GBM start - 기존 입력타입 10번까지만 화재로 보던 것을 GT1 입력타입 추가로 16~21번까지 화재로 처리
-#if 1
-		strType = CDeviceInfo::Instance()->GetDeviceName(strAddress).Left(2);	
-#else
-		strType = CDeviceInfo::Instance()->GetDeviceName(strAddress).Left(1);
-#endif
-		//20240704 GBM end
 
-		//20240704 GBM end
+		// 기존 입력타입 10번까지만 화재로 보던 것을 GT1 입력타입 추가로 16~21번까지 화재로 처리 (앞에 번호 첫번째 자리만 보다가 두번째 자리까지 보고 판단)
+		strType = CDeviceInfo::Instance()->GetDeviceName(strAddress).Left(2);	
+
 		sName = CDeviceInfo::Instance()->GetDeviceName(strAddress).Mid(3);
 
 		currTime = CTime::GetCurrentTime();
@@ -939,8 +920,7 @@ void CEventSend::SendThreadLoop()
 			}
 			else if ('F' == pData[2])
 			{
-				//20240704 GBM start - 기존 입력타입 10번까지만 화재로 보던 것을 GT1 입력타입 추가로 16~21번까지 화재로 처리
-#if 1
+				// 기존 입력타입 10번까지만 화재로 보던 것을 GT1 입력타입 추가로 16~21번까지 화재로 처리
 				int nInputType = 0;
 				nInputType = _wtoi(strType);
 
@@ -951,16 +931,6 @@ void CEventSend::SendThreadLoop()
 					m_dwFire = GetTickCount();
 					ProcessEventQueue(m_fireQueue, m_dwFire, true);
 				}
-#else
-				if (strType == "0") // 화재
-				{
-					SendAll();
-					m_fireQueue.push(pData);
-					m_dwFire = GetTickCount();
-					ProcessEventQueue(m_fireQueue, m_dwFire, true);
-				}
-#endif
-				//20240704 GBM end
 				else // 감시
 				{
 					m_spyQueue.push(pData);
@@ -994,16 +964,15 @@ void CEventSend::SendThreadLoop()
 			}
 		}
 
-		//Sleep(1);	//20230403 GBM - test
+		//Sleep(1);
 	}
 }
 
 void CEventSend::ProcessEventQueue(queue<BYTE*> & queue, DWORD & dwValue, bool bSend /*= false*/)
 {
-	//20240725 GBM start - 전송하기 전에 수신기 타입 받아옴
+	// 전송하기 전에 수신기 타입 받아옴
 	int nManagerSeq = CCommonState::Instance()->m_nIdx;
 	CClientInterface::Instance()->ProcessRequestGetFacpType(nManagerSeq);
-	//20240725 GBM end
 
 	int nSize = queue.size();
 	if (nSize == 0) {
@@ -1061,23 +1030,19 @@ void CEventSend::ProcessEventQueue(queue<BYTE*> & queue, DWORD & dwValue, bool b
 	if (bSend) {
 		if (GetTickCount() - CCommonState::Instance()->m_dwToken > 3000)
 		{
-			//20230320 GBM start - test
 #ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
 			LARGE_INTEGER startTime, endTime;
 			QueryPerformanceCounter(&startTime);
 #endif
-			//20230320 GBM end
 
 			CClientInterface::Instance()->ProcessCommonRequest(ProtocolHeader::RequestGetUserTokenList, CCommonState::Instance()->m_nIdx);
 
-			//20230320 GBM start - test
 #ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
 			QueryPerformanceCounter(&endTime);
 			double duringTime;
 			duringTime = CCommonFunc::GetPreciseTime(startTime, endTime);
 			Log::Trace("사용자 리스트 요청에 걸린 시간 : %f", duringTime);
 #endif
-			//20230320 GBM end
 
 			DWORD dwLastTime = GetTickCount();
 			CCommonState::Instance()->m_dwToken = 0;
@@ -1122,7 +1087,7 @@ void CEventSend::ProcessEventQueue(queue<BYTE*> & queue, DWORD & dwValue, bool b
 			Log::Trace("Event Alarm Send!");
 		}
 		//20240628 GBM end
-		//20230410 GBM end
+		//20231129 GBM end
 	}
 
 	dwValue = 0;
@@ -1363,229 +1328,12 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 
 void CEventSend::SendAlarm(BYTE* pData, int nSendCount)
 {
-	//20233020 GBM start - test 1:초기화 루틴 분리, 2:기존 루틴 -> 20230420 GBM - 20인 테스트 시 잘 안되서 순차처리 방식으로 회귀
-#if 0
-	//
-	//20230320 GBM start - test
-#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
-	LARGE_INTEGER startTime, roopStartTime, initEndTime, endTime;
-	double duringTime;
-	QueryPerformanceCounter(&startTime);
-#endif
-	//20230320 GBM end
-
-	char szSendData[4000];
-	
-	char strUtf8[4000] = { 0, };
-	int nLen;
-	char* pSendData;
-	char* mID;
-	char szTitle[64], szBody[128];
-
-	CTime   currTime;
-	CString strHeader;
-	CString strInputType;
-	CString sTemp;
-	LPVOID lpOutputBuffer = NULL;
-
-	DWORD dwLastTime = 0;
-
-	memset(szSendData, 0, 4000);
-	memset(strUtf8, 0x00, 4000);
-
-	currTime = CTime::GetCurrentTime();
-
-	CString strUni, sTitle, strName, strDisplay;
-
-	if (!CheckClassify(pData, strUni, sTitle, strName, strDisplay, nSendCount)) {
-		//SAFE_DELETE(pData);
-		//20230320 GBM start - test
-		Log::Trace("SendAlarm - CheckClassify 실패!");
-		CString strBuf = _T("");
-		for (int i = 0; i < SI_EVENT_BUF_SIZE; i++)
-		{
-			strBuf += pData[i];
-		}
-
-		Log::Trace("pData : [%s]", CCommonFunc::WCharToChar(strBuf.GetBuffer(0)));
-		//20230320 GBM end
-		return;
-	}
-
-	//---------------------------------------------------------------------------------------
-	nLen = WideCharToMultiByte(CP_UTF8, 0, strUni, lstrlenW(strUni), NULL, 0, NULL, NULL);
-	WideCharToMultiByte(CP_UTF8, 0, strUni, lstrlenW(strUni), strUtf8, nLen, NULL, NULL);
-
-	BOOL bJason = true;
-	if (bJason) {
-		strcpy_s(szBody, CCommonFunc::WcharToUtf8(strName.GetBuffer(0)));
-		strcpy_s(szTitle, CCommonFunc::WcharToUtf8(sTitle.GetBuffer(0)));
-	}
-
-	mIDSync.Enter();
-	int nCount = m_list.GetCount();
-	mIDSync.Leave();
-
-	// utf8 -> urlencode
-	pSendData = qURLencode(strUtf8);
-
-	mIDSync.Enter();
-	nCount = m_list.GetCount();
-	userInfo* pInfo = NULL;
-	
-	//
-
-	HANDLE hConnect = InternetOpen(L"FCM", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
-	if (hConnect == NULL)
-	{
-		mIDSync.Leave();
-		//SAFE_DELETE(pData);
-		return;
-	}
-
-	HANDLE hHttp = InternetConnect(hConnect, L"fcm.googleapis.com", INTERNET_DEFAULT_HTTPS_PORT, NULL, NULL, INTERNET_SERVICE_HTTP, 0, NULL);
-	if (hHttp == NULL)
-	{
-		InternetCloseHandle(hConnect);
-		hHttp = NULL;
-		mIDSync.Leave();
-		//SAFE_DELETE(pData);
-		return;
-	}
-
-	//
-	HANDLE hReq = HttpOpenRequest(hHttp, L"POST", L"/fcm/send", L"HTTP/1.1", NULL, NULL,
-		INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_SECURE | INTERNET_FLAG_IGNORE_CERT_CN_INVALID | INTERNET_FLAG_IGNORE_CERT_DATE_INVALID, 0);
-	if (hReq == NULL)
-	{
-		InternetCloseHandle(hConnect);
-		InternetCloseHandle(hHttp);
-		mIDSync.Leave();
-		//SAFE_DELETE(pData);
-		return;
-	}
-	//
-
-	//20230320 GBM start - test
-#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
-	QueryPerformanceCounter(&initEndTime);
-	duringTime = CCommonFunc::GetPreciseTime(startTime, initEndTime);
-	Log::Trace("FCM Push Message 초기화 시간 : %f", duringTime);
-#endif
-	//20230320 GBM end
-	//
-
-	for (int i = 0; i < nCount; i++)
-	{
-		pInfo = m_list.GetAt(m_list.FindIndex(i));
-		if (!pInfo) {
-			continue;
-		}
-		if (pInfo->nUseTime) {
-			if (pInfo->nHour > currTime.GetHour() || pInfo->nEndHour < currTime.GetHour()
-				|| (pInfo->nHour == currTime.GetHour() && pInfo->nMin > currTime.GetMinute())
-				|| (pInfo->nEndHour == currTime.GetHour() && pInfo->nEndMin < currTime.GetMinute()))
-			{
-				continue;
-			}
-		}
-		if (!pInfo->nAlert) {
-			continue;
-		}
-		if (sTitle.Find(L"화재") >= 0 && pInfo->nFire == 0) {
-			continue;
-		}
-		if (sTitle.Find(L"가스") >= 0 && pInfo->nGas == 0) {
-			continue;
-		}
-		if (sTitle.Find(L"감시") >= 0 && pInfo->nSpy == 0) {
-			continue;
-		}
-		if (sTitle.Find(L"단선") >= 0 && pInfo->nLine == 0) {
-			continue;
-		}
-
-		if ("" != pInfo->szToken)//m_IDList[i])
-		{
-			//20230320 GBM start - test
-#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
-			QueryPerformanceCounter(&roopStartTime);
-#endif
-			//20230320 GBM end
-
-			//
-			if (!bJason) {
-				strHeader += "Content-Type:application/x-www-form-urlencoded;charset=UTF-8";
-			}
-			else {
-				strHeader += "Content-Type:application/json";
-			}
-			strHeader += "\r\n";
-			strHeader += "Authorization:key=";
-			strHeader += "AAAAfiAPpoM:APA91bEeX02UhoaqaGvTPffwhhp1y7VAY1PFDFiMfkANhYoEZqrSunBoaBGKoXKvnljDGrksIjUPniz7w2bCN7Lp9GABQovcTsbMbab_yYBXrvtb9DXBvIODfeopk4DLbsYJRgD9eDO4";
-			strHeader += "\r\n\r\n";
-
-			HttpAddRequestHeaders(hReq, strHeader, strHeader.GetAllocLength(), HTTP_ADDREQ_FLAG_REPLACE | HTTP_ADDREQ_FLAG_ADD);
-			//
-
-			//
-			nLen = WideCharToMultiByte(CP_UTF8, 0, /*m_IDList[i]*/pInfo->szToken, lstrlenW(pInfo->szToken), NULL, 0, NULL, NULL);
-			WideCharToMultiByte(CP_UTF8, 0, pInfo->szToken, lstrlenW(pInfo->szToken), strUtf8, nLen, NULL, NULL);
-
-			mID = qURLencode(strUtf8);
-
-			if (!bJason) {
-				sprintf_s(szSendData, 4000, "&priority=high&%s%s&registration_id=%s", "data=", pSendData, mID);
-			}
-			else {
-				sprintf_s(szSendData, 4000, "{\"to\":\"%s\", \"priority\": \"high\", \
-						\"notification\" : {\"body\" : \"%s\",\"title\" : \"%s\"},\
-						\"data\" : {\"event\":\"%s\"},\
-							\"android\" : {\"priority\":\"high\"},\
-								\"apns\" : {\"headers\":{\"apns-priority\":\"10\"}},\
-									\"webpush\" : {\"headers\": {\"Urgency\": \"high\"}}}"
-					, mID, szBody, szTitle, pSendData);
-			}
-			//
-
-			BOOL bSend = HttpSendRequest(hReq, NULL, 0, (LPVOID)szSendData, strlen(szSendData));
-			Log::Trace("사용자 %d FCM Push Message 처리 완료! - 결과 : %d", i, bSend);
-
-			//20230320 GBM start - test
-#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
-			QueryPerformanceCounter(&endTime);
-			duringTime = CCommonFunc::GetPreciseTime(roopStartTime, endTime);
-			Log::Trace("사용자 %d, FCM Push Message 처리 시간 : %f", i, duringTime);
-#endif
-			//20230320 GBM end
-		}
-	}
-
-	free(mID);
-	::InternetCloseHandle(hReq);
-	::InternetCloseHandle(hHttp);
-	::InternetCloseHandle(hConnect);
-	free(pSendData);
-
-	//SAFE_DELETE(pData);
-
-	//20230320 GBM start - test
-#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
-	QueryPerformanceCounter(&endTime);
-	duringTime = CCommonFunc::GetPreciseTime(startTime, endTime);
-	Log::Trace("FCM Push Message 전체 처리 시간 : %f", duringTime);
-#endif
-	//20230320 GBM end
-
-	mIDSync.Leave();
-#else
-	//20230320 GBM start - test
+	//202330320 GBM start - test 1:초기화 루틴 분리, 2:기존 루틴 -> 20230420 GBM - 20인 테스트 시 잘 안되서 순차처리 방식으로 회귀
 #ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
 	LARGE_INTEGER startTime, endTime;
 	double duringTime;
 	QueryPerformanceCounter(&startTime);
 #endif
-	//20230320 GBM end
 
 	char szSendData[4000];
 
@@ -1611,8 +1359,6 @@ void CEventSend::SendAlarm(BYTE* pData, int nSendCount)
 	CString strUni, sTitle, strName, strDisplay;
 
 	if (!CheckClassify(pData, strUni, sTitle, strName, strDisplay, nSendCount)) {
-		//SAFE_DELETE(pData);
-		//20230320 GBM start - test
 		Log::Trace("SendAlarm - CheckClassify 실패!");
 		CString strBuf = _T("");
 		for (int i = 0; i < SI_EVENT_BUF_SIZE; i++)
@@ -1621,7 +1367,6 @@ void CEventSend::SendAlarm(BYTE* pData, int nSendCount)
 		}
 
 		Log::Trace("pData : [%s]", CCommonFunc::WCharToChar(strBuf.GetBuffer(0)));
-		//20230320 GBM end
 		return;
 	}
 
@@ -1677,12 +1422,11 @@ void CEventSend::SendAlarm(BYTE* pData, int nSendCount)
 
 		if ("" != pInfo->szToken)//m_IDList[i])
 		{
-			//20230320 GBM start - test
+			
 #ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
 			LARGE_INTEGER startTime, endTime;
 			QueryPerformanceCounter(&startTime);
 #endif
-			//20230320 GBM end
 
 			HANDLE hConnect = InternetOpen(L"FCM", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
 			if (hConnect == NULL)
@@ -1752,42 +1496,35 @@ void CEventSend::SendAlarm(BYTE* pData, int nSendCount)
 			::InternetCloseHandle(hHttp);
 			::InternetCloseHandle(hConnect);
 
-			//20230320 GBM start - test
 #ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
 			QueryPerformanceCounter(&endTime);
 			double duringTime;
 			duringTime = CCommonFunc::GetPreciseTime(startTime, endTime);
 			Log::Trace("사용자 %d, FCM Push Message 처리 시간 : %f", i, duringTime);
 #endif
-			//20230320 GBM end
 		}
 	}
 	free(pSendData);
 
 	//SAFE_DELETE(pData);
 
-	//20230320 GBM start - test
 #ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
 	QueryPerformanceCounter(&endTime);
 	duringTime = CCommonFunc::GetPreciseTime(startTime, endTime);
 	Log::Trace("FCM Push Message 전체 처리 시간 : %f", duringTime);
 #endif
-	//20230320 GBM end
 
 	mIDSync.Leave();
-#endif
 //20230320 GBM end
 }
 
 void CEventSend::SendAlarmInParallel(BYTE* pData, int nSendCount)
 {
 	//
-	//20230320 GBM start - test
 #ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
 	LARGE_INTEGER startTime, endTime;
 	QueryPerformanceCounter(&startTime);
 #endif
-	//20230320 GBM end
 
 	char szSendData[4000];
 
@@ -1813,8 +1550,6 @@ void CEventSend::SendAlarmInParallel(BYTE* pData, int nSendCount)
 	CString strUni, sTitle, strName, strDisplay;
 
 	if (!CheckClassify(pData, strUni, sTitle, strName, strDisplay, nSendCount)) {
-		//SAFE_DELETE(pData);
-		//20230320 GBM start - test
 		Log::Trace("SendAlarm - CheckClassify 실패!");
 		CString strBuf = _T("");
 		for (int i = 0; i < SI_EVENT_BUF_SIZE; i++)
@@ -1823,7 +1558,6 @@ void CEventSend::SendAlarmInParallel(BYTE* pData, int nSendCount)
 		}
 
 		Log::Trace("pData : [%s]", CCommonFunc::WCharToChar(strBuf.GetBuffer(0)));
-		//20230320 GBM end
 		return;
 	}
 
@@ -1893,29 +1627,24 @@ void CEventSend::SendAlarmInParallel(BYTE* pData, int nSendCount)
 
 	//SAFE_DELETE(pData);
 
-	//20230320 GBM start - test
 #ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
 	QueryPerformanceCounter(&endTime);
 	double duringTime;
 	duringTime = CCommonFunc::GetPreciseTime(startTime, endTime);
 	Log::Trace("FCM Push Message 전체 처리 시간 : %f", duringTime);
 #endif
-	//20230320 GBM end
 
 	mIDSync.Leave();
 }
 
-//20230814 GBM start - 사용자에게 전송을 사용자 별이 아닌 한번에 처리하는 함수
+// 사용자에게 전송을 사용자 별이 아닌 한번에 처리하는 함수
 void CEventSend::SendAlarmAtOnce(BYTE* pData, int nSendCount)
 {
-#if 1
-
 #ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
 	LARGE_INTEGER startTime, roopStartTime, initEndTime, endTime;
 	double duringTime;
 	QueryPerformanceCounter(&startTime);
 #endif
-	//20230320 GBM end
 
 	//기존에 4000에서 registration_ids에 최대 1000명까지 가능하므로 토큰 한 문자열이 163, 따옴표 둘, 공백까지 이므로 166 * 1000 + 4000의 크기로 정한다.
 	char szSendData[170000];
@@ -1945,8 +1674,6 @@ void CEventSend::SendAlarmAtOnce(BYTE* pData, int nSendCount)
 	CString strUni, sTitle, strName, strDisplay;
 
 	if (!CheckClassify(pData, strUni, sTitle, strName, strDisplay, nSendCount)) {
-		//SAFE_DELETE(pData);
-		//20230320 GBM start - test
 		Log::Trace("SendAlarm - CheckClassify 실패!");
 		CString strBuf = _T("");
 		for (int i = 0; i < SI_EVENT_BUF_SIZE; i++)
@@ -1955,7 +1682,6 @@ void CEventSend::SendAlarmAtOnce(BYTE* pData, int nSendCount)
 		}
 
 		Log::Trace("pData : [%s]", CCommonFunc::WCharToChar(strBuf.GetBuffer(0)));
-		//20230320 GBM end
 		return;
 	}
 
@@ -2013,13 +1739,11 @@ void CEventSend::SendAlarmAtOnce(BYTE* pData, int nSendCount)
 	}
 	//
 
-	//20230320 GBM start - test
 #ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
 	QueryPerformanceCounter(&initEndTime);
 	duringTime = CCommonFunc::GetPreciseTime(startTime, initEndTime);
 	Log::Trace("FCM Push Message 초기화 시간 : %f", duringTime);
 #endif
-	//20230320 GBM end
 	//
 	CString strRegistrationIDs = _T("");
 
@@ -2079,12 +1803,9 @@ void CEventSend::SendAlarmAtOnce(BYTE* pData, int nSendCount)
 	nLen = WideCharToMultiByte(CP_UTF8, 0, /*m_IDList[i]*/strRegistrationIDs, lstrlenW(strRegistrationIDs), NULL, 0, NULL, NULL);
 	WideCharToMultiByte(CP_UTF8, 0, strRegistrationIDs, lstrlenW(strRegistrationIDs), szRegistrationIds, nLen, NULL, NULL);
 
-
-	//20230320 GBM start - test
 #ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
 	QueryPerformanceCounter(&roopStartTime);
 #endif
-	//20230320 GBM end
 
 	//
 	if (!bJason) {
@@ -2121,15 +1842,13 @@ void CEventSend::SendAlarmAtOnce(BYTE* pData, int nSendCount)
 	BOOL bSend = HttpSendRequest(hReq, NULL, 0, (LPVOID)szSendData, strlen(szSendData));
 	Log::Trace("FCM Push Message 처리 완료! - 결과 : %d", bSend);
 
-	//20230320 GBM start - test
 #ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
 	QueryPerformanceCounter(&endTime);
 	duringTime = CCommonFunc::GetPreciseTime(roopStartTime, endTime);
 	Log::Trace("FCM Push Message 처리 시간 : %f", duringTime);
 #endif
-	//20230320 GBM end
 
-	//20230816 GBM start - 응답 받기
+	// 응답 받기
 	DWORD dwByteRead = 0;
 	DWORD bufSize = 170000;
 	char* pszBuf = NULL;
@@ -2157,7 +1876,7 @@ void CEventSend::SendAlarmAtOnce(BYTE* pData, int nSendCount)
 	free(pszBuf);
 
 	//1. 응답 문자열에 "failed_registration_ids"가 있는 지를 확인
-	//test
+
 	//sRecv = _T("aaaaafailed_registration_ids : [\"123\", \"456\", \"789\"]aaaaa");
 	
 	BOOL bFailed = FALSE;
@@ -2210,8 +1929,6 @@ void CEventSend::SendAlarmAtOnce(BYTE* pData, int nSendCount)
 		Log::Trace("FCM Push Message 재처리 완료! - 결과 : %d", bSend);
 	}
 
-	//20230816 GBM end
-
 	//free(mID);
 	::InternetCloseHandle(hReq);
 	::InternetCloseHandle(hHttp);
@@ -2221,223 +1938,5 @@ void CEventSend::SendAlarmAtOnce(BYTE* pData, int nSendCount)
 	//SAFE_DELETE(pData);
 
 	mIDSync.Leave();
-
-#else
-
-#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
-	LARGE_INTEGER startTime, roopStartTime, initEndTime, endTime;
-	double duringTime;
-	QueryPerformanceCounter(&startTime);
-#endif
-	//20230320 GBM end
-
-	char szSendData[4000];
-
-	char strUtf8[4000] = { 0, };
-	int nLen;
-	char* pSendData;
-	char* mID;
-	char szTitle[64], szBody[128];
-
-	CTime   currTime;
-	CString strHeader;
-	CString strInputType;
-	CString sTemp;
-	LPVOID lpOutputBuffer = NULL;
-
-	DWORD dwLastTime = 0;
-
-	memset(szSendData, 0, 4000);
-	memset(strUtf8, 0x00, 4000);
-
-	currTime = CTime::GetCurrentTime();
-
-	CString strUni, sTitle, strName, strDisplay;
-
-	if (!CheckClassify(pData, strUni, sTitle, strName, strDisplay, nSendCount)) {
-		//SAFE_DELETE(pData);
-		//20230320 GBM start - test
-		Log::Trace("SendAlarm - CheckClassify 실패!");
-		CString strBuf = _T("");
-		for (int i = 0; i < SI_EVENT_BUF_SIZE; i++)
-		{
-			strBuf += pData[i];
-		}
-
-		Log::Trace("pData : [%s]", CCommonFunc::WCharToChar(strBuf.GetBuffer(0)));
-		//20230320 GBM end
-		return;
-	}
-
-	//---------------------------------------------------------------------------------------
-	nLen = WideCharToMultiByte(CP_UTF8, 0, strUni, lstrlenW(strUni), NULL, 0, NULL, NULL);
-	WideCharToMultiByte(CP_UTF8, 0, strUni, lstrlenW(strUni), strUtf8, nLen, NULL, NULL);
-
-	BOOL bJason = true;
-	if (bJason) {
-		strcpy_s(szBody, CCommonFunc::WcharToUtf8(strName.GetBuffer(0)));
-		strcpy_s(szTitle, CCommonFunc::WcharToUtf8(sTitle.GetBuffer(0)));
-	}
-
-	mIDSync.Enter();
-	int nCount = m_list.GetCount();
-	mIDSync.Leave();
-
-	// utf8 -> urlencode
-	pSendData = qURLencode(strUtf8);
-
-	mIDSync.Enter();
-	nCount = m_list.GetCount();
-	userInfo* pInfo = NULL;
-
-	//
-
-	HANDLE hConnect = InternetOpen(L"FCM", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
-	if (hConnect == NULL)
-	{
-		mIDSync.Leave();
-		//SAFE_DELETE(pData);
-		return;
-	}
-
-	HANDLE hHttp = InternetConnect(hConnect, L"fcm.googleapis.com", INTERNET_DEFAULT_HTTPS_PORT, NULL, NULL, INTERNET_SERVICE_HTTP, 0, NULL);
-	if (hHttp == NULL)
-	{
-		InternetCloseHandle(hConnect);
-		hHttp = NULL;
-		mIDSync.Leave();
-		//SAFE_DELETE(pData);
-		return;
-	}
-
-	//
-	HANDLE hReq = HttpOpenRequest(hHttp, L"POST", L"/fcm/send", L"HTTP/1.1", NULL, NULL,
-		INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_SECURE | INTERNET_FLAG_IGNORE_CERT_CN_INVALID | INTERNET_FLAG_IGNORE_CERT_DATE_INVALID, 0);
-	if (hReq == NULL)
-	{
-		InternetCloseHandle(hConnect);
-		InternetCloseHandle(hHttp);
-		mIDSync.Leave();
-		//SAFE_DELETE(pData);
-		return;
-	}
-	//
-
-	//20230320 GBM start - test
-#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
-	QueryPerformanceCounter(&initEndTime);
-	duringTime = CCommonFunc::GetPreciseTime(startTime, initEndTime);
-	Log::Trace("FCM Push Message 초기화 시간 : %f", duringTime);
-#endif
-	//20230320 GBM end
-	//
-	CString strRegistrationIDs = _T("");
-
-	for (int i = 0; i < nCount; i++)
-	{
-		pInfo = m_list.GetAt(m_list.FindIndex(i));
-		if (!pInfo) {
-			continue;
-		}
-		if (pInfo->nUseTime) {
-			if (pInfo->nHour > currTime.GetHour() || pInfo->nEndHour < currTime.GetHour()
-				|| (pInfo->nHour == currTime.GetHour() && pInfo->nMin > currTime.GetMinute())
-				|| (pInfo->nEndHour == currTime.GetHour() && pInfo->nEndMin < currTime.GetMinute()))
-			{
-				continue;
-			}
-		}
-		if (!pInfo->nAlert) {
-			continue;
-		}
-		if (sTitle.Find(L"화재") >= 0 && pInfo->nFire == 0) {
-			continue;
-		}
-		if (sTitle.Find(L"가스") >= 0 && pInfo->nGas == 0) {
-			continue;
-		}
-		if (sTitle.Find(L"감시") >= 0 && pInfo->nSpy == 0) {
-			continue;
-		}
-		if (sTitle.Find(L"단선") >= 0 && pInfo->nLine == 0) {
-			continue;
-		}
-
-		if ("" != pInfo->szToken)//m_IDList[i])
-		{
-			//
-			strRegistrationIDs += "\"";
-			strRegistrationIDs += pInfo->szToken;
-			strRegistrationIDs += "\"";
-
-			if (nCount != i + 1)
-				strRegistrationIDs += ", ";
-		}
-	}
-
-
-	//20230320 GBM start - test
-#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
-	QueryPerformanceCounter(&roopStartTime);
-#endif
-	//20230320 GBM end
-
-	//
-	if (!bJason) {
-		strHeader += "Content-Type:application/x-www-form-urlencoded;charset=UTF-8";
-	}
-	else {
-		strHeader += "Content-Type:application/json";
-	}
-	strHeader += "\r\n";
-	strHeader += "Authorization:key=";
-	strHeader += "AAAAfiAPpoM:APA91bEeX02UhoaqaGvTPffwhhp1y7VAY1PFDFiMfkANhYoEZqrSunBoaBGKoXKvnljDGrksIjUPniz7w2bCN7Lp9GABQovcTsbMbab_yYBXrvtb9DXBvIODfeopk4DLbsYJRgD9eDO4";
-	strHeader += "\r\n\r\n";
-
-	HttpAddRequestHeaders(hReq, strHeader, strHeader.GetAllocLength(), HTTP_ADDREQ_FLAG_REPLACE | HTTP_ADDREQ_FLAG_ADD);
-	//
-
-	//
-	nLen = WideCharToMultiByte(CP_UTF8, 0, /*m_IDList[i]*/strRegistrationIDs, lstrlenW(strRegistrationIDs), NULL, 0, NULL, NULL);
-	WideCharToMultiByte(CP_UTF8, 0, strRegistrationIDs, lstrlenW(strRegistrationIDs), strUtf8, nLen, NULL, NULL);
-
-	mID = qURLencode(strUtf8);
-
-	if (!bJason) {
-		sprintf_s(szSendData, 4000, "&priority=high&%s%s&registration_id=%s", "data=", pSendData, mID);
-	}
-	else {
-		//지금은 위에서 토큰 배열에 들어가는 따옴표까지 qURLencode하는데 따옴표를 변환하지 않고 문자열에 붙이고 시도해 볼 것
-		sprintf_s(szSendData, 4000, "{\"registration_ids\": [%s], \"priority\": \"high\", \
-					\"notification\" : {\"body\" : \"%s\",\"title\" : \"%s\"},\
-					\"data\" : {\"event\":\"%s\"},\
-						\"android\" : {\"priority\":\"high\"},\
-							\"apns\" : {\"headers\":{\"apns-priority\":\"10\"}},\
-								\"webpush\" : {\"headers\": {\"Urgency\": \"high\"}}}"
-			, mID, szBody, szTitle, pSendData);
-	}
-	//
-
-	BOOL bSend = HttpSendRequest(hReq, NULL, 0, (LPVOID)szSendData, strlen(szSendData));
-	Log::Trace("FCM Push Message 처리 완료! - 결과 : %d", bSend);
-
-	//20230320 GBM start - test
-#ifdef PUSH_MESSAGE_TIME_MEASURE_MODE
-	QueryPerformanceCounter(&endTime);
-	duringTime = CCommonFunc::GetPreciseTime(roopStartTime, endTime);
-	Log::Trace("FCM Push Message 처리 시간 : %f", duringTime);
-#endif
-	//20230320 GBM end
-
-	free(mID);
-	::InternetCloseHandle(hReq);
-	::InternetCloseHandle(hHttp);
-	::InternetCloseHandle(hConnect);
-	free(pSendData);
-
-	//SAFE_DELETE(pData);
-
-	mIDSync.Leave();
-#endif
 }
 //20230814 GBM end

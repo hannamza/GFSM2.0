@@ -91,7 +91,7 @@ public:
 		RequestGetEventListEnc,	// 42. 이벤트 목록 요청 암호화
 		ResponseGetEventListEnc,
 
-		RequestGetFacpType,		// 44. 수신기 타입 정보 : 20240628 GBM 
+		RequestGetFacpType,		// 44. 수신기 타입 정보
 		ResponseGetFacpType,
 
 		DefineEndProtocol
@@ -469,7 +469,7 @@ public:
 	int nLimitUser;
 };
 
-//20240628 GBM start
+
 // 수신기 타입 정보 요청
 class ProtocolRequestGetFacpType : public ProtocolHeader
 {
@@ -494,6 +494,6 @@ public:
 	}
 	int nFacpType;
 };
-//20240628 GBM end
+
 
 #pragma pack(pop, 1)
