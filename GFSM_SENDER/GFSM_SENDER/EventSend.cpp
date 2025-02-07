@@ -1067,6 +1067,8 @@ void CEventSend::ProcessEventQueue(queue<BYTE*> & queue, DWORD & dwValue, bool b
 
 		Log::Trace("SendCount = %d", m_nSendCount);
 
+		//20250207 GBM - Git Test
+
 		//20230410 GBM start - 프로그램 기동 후 최초는 순차 전송 -> 20230420 GBM - 스레드간 토큰 값이 겹치는 현상을 버퍼 동적할당으로 해결 후 처음부터 병렬 전송으로 전송해도 OK ->
 		//20230814 GBM - 사용자에게 전송을 사용자 별이 아닌 한번에 처리하는 함수 -> 
 		//20231129 GBM - OAuth2테스트를 위해 SendAlarmInParallel로 변경
