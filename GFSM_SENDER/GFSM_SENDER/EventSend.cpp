@@ -1185,7 +1185,7 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 		strLineNum.Format(L"%c%c%c", pData[9], pData[10], pData[11]);
 
 		strAddress.Format(L"%02s%02s%s%03s", strFACPNum, strUnitNum, strLoopNum, strLineNum);
-		strType = CDeviceInfo::Instance()->GetDeviceName(strAddress).Left(1);
+		strType = CDeviceInfo::Instance()->GetDeviceName(strAddress).Left(2);
 		sName = CDeviceInfo::Instance()->GetDeviceName(strAddress).Mid(3);
 
 		if ('R' == pData[2])
@@ -1207,7 +1207,13 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 		}
 		else if ('F' == pData[2])
 		{
-			if (strType == "0")
+			//20250808 GBM start - 실제 알람 처리는 다른 곳에서 해서 상관없지만 로그 내용에는 
+			//기존에 반영된 [화재 이벤트 타입 판단을 기존 입력타입 1~9까지 하던 것을 1~9 and 16 ~ 21 (GT1 새 타입)까지 하도록 수정]
+			//이 반영되지 않아 이를 적용해서 실제 처리와 로그가 일치하도록 수정
+			int nInputType = 0;
+			nInputType = _wtoi(strType);
+
+			if ((nInputType >= 자탐감지기 && nInputType <= 연식주소형) || (nInputType >= AN열식교차A && nInputType <= 광센서감지기)) // 화재
 			{
 #ifndef ENGLISH_MODE
 				strPosition = L"화재";
@@ -1225,6 +1231,7 @@ bool CEventSend::CheckClassify(BYTE* pData, CString & sUni, CString & sTitle, CS
 #endif
 				strSecond.Format(L"02x");
 			}
+			//20250808 GBM end
 
 			if (L"63" == strUnitNum)
 			{
